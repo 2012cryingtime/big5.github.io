@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metric Assessment Unit v2.0</title>
+    <title>Metric Assessment Unit v2.4</title>
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -12,20 +12,20 @@
             --text-primary: #e5e5e5;
             --text-muted: #666666;
             --border: #333333;
-            --font-main: 'Inter', sans-serif;
+            --accent: #ffffff;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
             /* Signal Colors */
             --val-1: #ff0000;
-            /* Red */
             --val-2: #ff9900;
-            /* Orange */
             --val-3: #525252;
-            /* Neutral */
             --val-4: #c8ff00;
-            /* Lime */
             --val-5: #00ff0d;
-            /* Green */
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -39,54 +39,85 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 700px;
-            padding: 2rem;
-            box-sizing: border-box;
+            max-width: 800px;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             height: 100%;
-            justify-content: center;
+            position: relative;
         }
 
-        /* Bionic Reading */
-        .bionic-bold {
-            font-weight: 800;
-            color: #ffffff;
-        }
-
-        /* Progress */
+        /* --- PROGRESS BAR --- */
         .progress-bar-container {
             width: 100%;
             height: 2px;
             background-color: #222;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
+            z-index: 100;
         }
 
         .progress-bar {
             height: 100%;
             background-color: var(--text-primary);
-            transition: width 0.2s ease;
+            transition: width 0.3s ease;
         }
 
-        /* Typography */
+        /* --- TYPOGRAPHY --- */
+        .bionic-bold {
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 400;
+            margin: 0;
+        }
+
+        /* --- QUESTION VIEW --- */
+        #question-view {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .question-meta {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            text-align: right;
+            letter-spacing: 1px;
+        }
+
         .question-text {
-            font-size: 1.6rem;
-            margin-bottom: 3rem;
+            font-size: 1.4rem;
+            margin-bottom: 2.5rem;
             text-align: left;
-            line-height: 1.4;
-            min-height: 4em;
+            line-height: 1.5;
+            min-height: 3.5em;
             font-weight: 300;
             letter-spacing: -0.01em;
         }
 
-        /* Input Grid */
+        @media (min-width: 768px) {
+            .question-text {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* --- INPUT GRID --- */
         .input-group {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -97,50 +128,44 @@
         }
 
         .input-rect {
-            height: 70px;
+            height: 60px;
             background-color: var(--card-bg);
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
             transition: background-color 0.1s;
-            font-family: var(--font-mono);
             position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .input-rect {
+                height: 80px;
+            }
         }
 
         .input-rect:hover {
             background-color: #1a1a1a;
-            color: #fff;
         }
 
-        /* Selected State */
         .input-rect.selected {
             background-color: #222;
-            color: #fff;
-            border-bottom: 2px solid #fff;
+            box-shadow: inset 0 -2px 0 var(--text-primary);
         }
 
-        /* Colored Dots */
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            margin-bottom: 8px;
         }
 
-        /* Navigation */
+        /* --- NAVIGATION --- */
         .nav-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-top: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
             height: 40px;
         }
 
@@ -150,6 +175,7 @@
             color: var(--text-muted);
             cursor: pointer;
             font-family: var(--font-mono);
+            font-size: 0.75rem;
             text-transform: uppercase;
             padding: 0.5rem 1rem;
             transition: all 0.2s;
@@ -165,84 +191,286 @@
             border: 1px solid var(--border);
         }
 
-        /* Results View */
+        /* --- RESULTS VIEW --- */
         #results-view {
             display: none;
             width: 100%;
-            overflow-y: auto;
             height: 100%;
+            overflow-y: auto;
+            padding-bottom: 4rem;
+            /* Space for scroll */
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
             padding-top: 1rem;
         }
 
+        /* Header Section */
         .result-header {
             border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            padding-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .designation-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
         }
 
         .archetype-code {
             font-family: var(--font-mono);
             color: var(--text-primary);
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            letter-spacing: -2px;
-            line-height: 1;
-        }
-
-        .archetype-summary {
-            font-family: var(--font-main);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #ccc;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: #111;
-            border-left: 2px solid #fff;
-        }
-
-        .data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .score-block {
+            letter-spacing: -1px;
+            line-height: 1.1;
             margin-bottom: 0.5rem;
         }
 
-        .score-label {
+        .archetype-detailed {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .archetype-detailed:hover {
+            color: var(--text-primary);
+            background: #111;
+            border-color: var(--text-primary);
+        }
+
+        .archetype-summary {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #ccc;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #111;
+            border-left: 2px solid var(--text-primary);
+            text-align: left;
+        }
+
+        /* Info Box (SLOAN) */
+        #sloan-info {
+            display: none;
+            text-align: left;
+            background: #0f0f0f;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            color: #888;
+        }
+
+        #sloan-info h3 {
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 700px) {
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .info-column p {
+            color: var(--text-primary);
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        /* Complex Code Display in Expanded View */
+        #complex-code-display {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #333;
+            letter-spacing: 1px;
+        }
+
+        .user-breakdown-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .user-breakdown-list li {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ub-letter {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .ub-desc {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        /* Legend Tables */
+        .legend-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .legend-table td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .legend-table .sym {
+            color: #fff;
+            font-size: 1rem;
+            width: 30px;
+        }
+
+        /* Data Grid Layout */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .data-grid {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+        }
+
+        /* Chart Container */
+        .chart-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1 / 1;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-width: 400px;
+        }
+
+        /* Score Bars */
+        .score-section-title {
             font-family: var(--font-mono);
             font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #222;
+            padding-bottom: 0.25rem;
+        }
+
+        .score-block {
+            margin-bottom: 0.8rem;
+        }
+
+        .score-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.3rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
         }
 
-        .score-bar-bg {
+        .score-name {
+            color: #ccc;
+        }
+
+        .score-val {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
+        .score-track {
             width: 100%;
-            height: 4px;
-            background: #222;
+            height: 6px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            position: relative;
         }
 
-        .score-bar-fill {
+        .score-fill {
             height: 100%;
-            background: #fff;
+            background: var(--text-primary);
+            transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        canvas {
-            border: 1px solid var(--border);
-            background: #0f0f0f;
+        /* Continue Button */
+        .continue-btn {
             width: 100%;
+            background: var(--text-primary);
+            border: 1px solid var(--text-primary);
+            color: var(--bg-color);
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .continue-btn:hover {
+            background: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
 
         ::-webkit-scrollbar-track {
@@ -264,8 +492,8 @@
     <div class="container">
         <!-- Question View -->
         <div id="question-view">
-            <div class="nav-controls" style="margin-bottom: 1rem; justify-content: flex-end;">
-                <span id="question-counter">INIT...</span>
+            <div class="question-meta">
+                <span id="question-counter">INITIALIZING...</span>
             </div>
 
             <div class="question-text" id="question-text"></div>
@@ -292,88 +520,149 @@
                 <button class="nav-btn" id="back-btn" onclick="prevQuestion()" style="visibility: hidden;">[ PREV
                     ]</button>
                 <button class="nav-btn jump-btn" id="jump-btn" onclick="jumpToFurthest()" style="display: none;">[
-                    RETURN TO LATEST ]</button>
+                    RETURN ]</button>
             </div>
         </div>
 
         <!-- Results View -->
         <div id="results-view">
-            <!-- RESULTS HEADER -->
-            <div class="results-header">
-                <div>DESIGNATION RECOGNIZED</div>
-                <div class="archetype-code" id="archetype-code"></div>
-                <div class="archetype-detailed" id="archetype-detailed" onclick="toggleSloanInfo()"
-                    style="cursor: pointer; opacity: 0.7; font-size: 1.2rem; margin-top: 5px;"></div>
-                <div class="archetype-summary" id="archetype-summary"></div>
+            <div class="results-container">
 
-                <div id="sloan-info"
-                    style="display: none; text-align: left; background: rgba(255,255,255,0.05); padding: 20px; margin-top: 20px; border: 1px solid #333; font-size: 0.9rem;">
-                    <h3 style="color: var(--accent); margin-top: 0;">SLOAN NOTATION</h3>
-                    <p><strong>Primary Letters:</strong></p>
-                    <ul style="list-style: none; padding-left: 0;">
-                        <li><strong>S/R</strong> (Social/Reserved) - Extraversion</li>
-                        <li><strong>L/C</strong> (Limbic/Calm) - Neuroticism</li>
-                        <li><strong>O/U</strong> (Organized/Unstructured) - Conscientiousness</li>
-                        <li><strong>A/E</strong> (Accommodating/Egocentric) - Agreeableness</li>
-                        <li><strong>N/I</strong> (Non-curious/Inquisitive) - Openness</li>
-                    </ul>
-                    <p><strong>Intensity Modifiers:</strong></p>
-                    <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: 1fr 1fr;">
-                        <li>⁺ Exceptionally High (80-100)</li>
-                        <li>˖ Very High (60-79)</li>
-                        <li>₊ Borderline High (54-59)</li>
-                        <li>￮ Balanced (50-53)</li>
-                        <li>⁻ Borderline Low (44-49)</li>
-                        <li>˗ Very Low (20-43)</li>
-                        <li>₋ Exceptionally Low (0-19)</li>
-                    </ul>
-                    <p><strong>Structural Match (End Symbol):</strong></p>
-                    <p>Indicates personality strength (deviation from average) and symmetry (consistency of deviation).
-                    </p>
-                    <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: 1fr 1fr;">
-                        <li>▾ Strong / Balanced</li>
-                        <li>▿ Strong / Uneven</li>
-                        <li>● Fair / Balanced</li>
-                        <li>⚬ Fair / Uneven</li>
-                        <li>￭ Weak / Balanced</li>
-                        <li>⌑ Weak / Uneven</li>
-                    </ul>
+                <!-- Header -->
+                <div class="result-header">
+                    <div class="designation-label">Your Designation</div>
+                    <div class="archetype-code" id="archetype-code">CALCULATING</div>
+                    <div class="archetype-detailed" id="archetype-detailed" onclick="toggleSloanInfo()">[ EXPAND
+                        DESIGNATION ANALYSIS ]</div>
+
+                    <div id="sloan-info">
+                        <div class="info-grid">
+                            <!-- Left Column: User Specifics -->
+                            <div class="info-column">
+                                <p>Your Configuration</p>
+                                <div id="complex-code-display"></div>
+                                <ul class="user-breakdown-list" id="user-breakdown">
+                                    <!-- Populated via JS -->
+                                </ul>
+                            </div>
+
+                            <!-- Right Column: Legend -->
+                            <div class="info-column">
+                                <p>Reference Key</p>
+
+                                <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; line-height: 1.4;">
+                                    <strong>Intensity Modifiers</strong> indicate how far your score deviates from the
+                                    average.<br><br>
+                                    <strong>Structural Match</strong> (the final symbol) indicates how strongly your
+                                    overall profile aligns with this archetype.
+                                </div>
+
+                                <!-- Intensity Table -->
+                                <table class="legend-table">
+                                    <tr>
+                                        <td class="sym">⁺</td>
+                                        <td>Exceptionally High</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">₊</td>
+                                        <td>Very High</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">˖</td>
+                                        <td>Borderline High</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">￮</td>
+                                        <td>Balanced</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">˗</td>
+                                        <td>Borderline Low</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⁻</td>
+                                        <td>Very Low</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">₋</td>
+                                        <td>Exceptionally Low</td>
+                                    </tr>
+                                </table>
+
+                                <!-- Structure Table -->
+                                <table class="legend-table">
+                                    <tr>
+                                        <th colspan="3"
+                                            style="border:none; padding-bottom:5px; color:#aaa; font-weight:normal;">
+                                            Structural Match Strength</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">▾</td>
+                                        <td>Strong Match</td>
+                                        <td>Balanced Profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">▿</td>
+                                        <td>Strong Match</td>
+                                        <td>Uneven Profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">●</td>
+                                        <td>Fair Match</td>
+                                        <td>Balanced Profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⚬</td>
+                                        <td>Fair Match</td>
+                                        <td>Uneven Profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">￭</td>
+                                        <td>Weak Match</td>
+                                        <td>Balanced Profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⌑</td>
+                                        <td>Weak Match</td>
+                                        <td>Uneven Profile</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="archetype-summary" id="archetype-summary"></div>
                 </div>
-            </div>
 
-            <div class="data-grid">
-                <div>
-                    <div class="score-label" style="margin-bottom: 1rem;">Metric Visualization</div>
-                    <canvas id="oceanCanvas" width="300" height="300"></canvas>
-                </div>
+                <!-- Data Grid -->
+                <div class="data-grid">
+                    <!-- Visual -->
+                    <div>
+                        <div class="score-section-title">Metric Visualization</div>
+                        <div class="chart-wrapper">
+                            <canvas id="oceanCanvas"></canvas>
+                        </div>
+                    </div>
 
-                <div>
-                    <div class="score-label" style="margin-bottom: 1rem;">Component Analysis</div>
-                    <div id="big5-scores"></div>
+                    <!-- Scores -->
+                    <div>
+                        <div class="score-section-title">Component Analysis</div>
+                        <div id="big5-scores"></div>
 
-                    <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
-                        <div class="score-label" style="margin-bottom: 1rem; color: #888;">Dark Triad Indices</div>
+                        <div class="score-section-title" style="margin-top: 2rem;">Dark Triad Indices</div>
                         <div id="dt-scores"></div>
                     </div>
                 </div>
-            </div>
 
-            <button class="nav-btn"
-                style="width:100%; margin-top:3rem; border:1px solid #333; padding:1rem; text-align:center;"
-                onclick="location.reload()">[ RESTART SEQUENCE ]</button>
+                <button class="continue-btn" onclick="redirectToForm()">
+                    [ CONTINUE TO FORM ] <span>&rarr;</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ---------------- MATERIALIST DATA STRUCTURE ----------------
-        // Questions rephrased to focus on material behavior, labor, and social structure.
-        // ---------------- MATERIALIST DATA STRUCTURE ----------------
-        // Questions rephrased to focus on material behavior, labor, and social structure.
-        // ORDER: Openness -> Conscientiousness -> Extraversion -> Agreeableness -> Neuroticism -> Dark Triad
-        // ---------------- MATERIALIST DATA STRUCTURE ----------------
-        // Questions rephrased to focus on material behavior, labor, and social structure.
-        // ORDER: Openness -> Conscientiousness -> Extraversion -> Agreeableness -> Neuroticism -> Dark Triad
-        // WEIGHTING: Big 5 traits have 10 items each. Dark Triad has 12 items (4 each).
+        // ---------------- DATA STRUCTURE ----------------
         const QUESTIONS = [
             // --- OPENNESS (10 Items) ---
             { id: 17, text: "I frequently read dense, difficult texts.", trait: "Openness", reverse: false },
@@ -400,14 +689,14 @@
             { id: 54, text: "I ensure the group stays on task.", trait: "Conscientiousness", reverse: false },
 
             // --- EXTRAVERSION (10 Items) ---
-            { id: 9, text: "I enjoy the energy of a crowd.", trait: "Extraversion", reverse: false }, // "Seek out" -> "Enjoy energy" (Easier)
-            { id: 10, text: "I avoid drawing attention to myself.", trait: "Extraversion", reverse: true }, // "Prefer background" -> "Avoid drawing attention"
-            { id: 11, text: "I am comfortable starting conversations.", trait: "Extraversion", reverse: false }, // "Initiate" -> "Comfortable starting"
-            { id: 12, text: "I keep my thoughts to myself in groups.", trait: "Extraversion", reverse: true }, // "Listen rather than speak" -> "Keep thoughts to self" (Harder to agree)
-            { id: 13, text: "I enjoy entertaining others.", trait: "Extraversion", reverse: false }, // "Perform" -> "Entertain"
-            { id: 14, text: "Socializing leaves me completely exhausted.", trait: "Extraversion", reverse: true }, // "Require solitude" -> "Completely exhausted" (Harder to agree)
+            { id: 9, text: "I enjoy the energy of a crowd.", trait: "Extraversion", reverse: false },
+            { id: 10, text: "I avoid drawing attention to myself.", trait: "Extraversion", reverse: true },
+            { id: 11, text: "I am comfortable starting conversations.", trait: "Extraversion", reverse: false },
+            { id: 12, text: "I keep my thoughts to myself in groups.", trait: "Extraversion", reverse: true },
+            { id: 13, text: "I enjoy entertaining others.", trait: "Extraversion", reverse: false },
+            { id: 14, text: "Socializing leaves me completely exhausted.", trait: "Extraversion", reverse: true },
             { id: 15, text: "I thrive in high-activity environments.", trait: "Extraversion", reverse: false },
-            { id: 16, text: "I cannot focus if others are nearby.", trait: "Extraversion", reverse: true }, // "Best work in isolation" -> "Cannot focus" (Harder to agree)
+            { id: 16, text: "I cannot focus if others are nearby.", trait: "Extraversion", reverse: true },
             { id: 61, text: "I take command in group settings.", trait: "Extraversion", reverse: false },
             { id: 62, text: "I maintain a wide network of contacts.", trait: "Extraversion", reverse: false },
 
@@ -436,19 +725,25 @@
             { id: 58, text: "I function effectively under high demand.", trait: "Neuroticism", reverse: true },
 
             // --- DARK TRIAD (12 Items) ---
-            { id: 41, text: "It is smart to use flattery to get what you want.", trait: "Machiavellianism", reverse: false }, // Softer than "I use compliments..."
-            { id: 42, text: "I know how to steer a conversation to my advantage.", trait: "Machiavellianism", reverse: false },
-            { id: 43, text: "I am careful about how much information I reveal.", trait: "Machiavellianism", reverse: false }, // Softer than "Withhold to get ahead"
-            { id: 44, text: "I evaluate relationships potential utility.", trait: "Machiavellianism", reverse: false },
-            { id: 45, text: "I genuinely lack empathy for others' problems.", trait: "Psychopathy", reverse: false }, // Harder than "Results over feelings"
-            { id: 46, text: "I would cheat if I knew I wouldn't get caught.", trait: "Psychopathy", reverse: false },
-            { id: 47, text: "I never feel remorse for my actions.", trait: "Psychopathy", reverse: false },
-            { id: 48, text: "I enjoy manipulating people for fun.", trait: "Psychopathy", reverse: false }, // Very hard P item
-            { id: 49, text: "I deserve more respect than the average person.", trait: "Narcissism", reverse: false },
-            { id: 50, text: "I cultivate my physical appearance for effect.", trait: "Narcissism", reverse: false },
-            { id: 51, text: "I expect special favors from others.", trait: "Narcissism", reverse: false },
-            { id: 52, text: "I seek public acclaim.", trait: "Narcissism", reverse: false }
+            // Machiavellianism: Reframed as "Strategic Realism" and "Information Control."
+            { id: 41, text: "Complete transparency is a strategic error in most negotiations.", trait: "Machiavellianism", reverse: false },
+            { id: 42, text: "To achieve significant goals, one must often tell people what they wish to hear.", trait: "Machiavellianism", reverse: false },
+            { id: 43, text: "It is safer to assume people have hidden agendas than to trust them blindly.", trait: "Machiavellianism", reverse: false },
+            { id: 44, text: "The outcome of a project is more important than the methods used to achieve it.", trait: "Machiavellianism", reverse: false },
+
+            // Psychopathy: Focus on detachment, lack of sentiment, and risk-taking.
+            { id: 45, text: "Sentimental morality often hinders necessary action.", trait: "Psychopathy", reverse: false },
+            { id: 46, text: "Rules are useful guidelines for the masses, but flexible for the exceptional.", trait: "Psychopathy", reverse: false },
+            { id: 47, text: "I rarely dwell on past mistakes; regret is a wasted emotion.", trait: "Psychopathy", reverse: false },
+            { id: 48, text: "I can make difficult decisions without being clouded by empathy.", trait: "Psychopathy", reverse: false },
+
+            // Narcissism: Focus on superiority, vision, and frustration with mediocrity.
+            { id: 49, text: "I often feel surrounded by incompetence.", trait: "Narcissism", reverse: false },
+            { id: 50, text: "My natural talents grant me the right to lead others.", trait: "Narcissism", reverse: false },
+            { id: 51, text: "Society would function better if more people listened to my ideas.", trait: "Narcissism", reverse: false },
+            { id: 52, text: "I require significant recognition to feel my efforts are valued.", trait: "Narcissism", reverse: false }
         ];
+
         // ---------------- LOGIC ----------------
         let currentQIndex = 0;
         let furthestQIndex = 0;
@@ -522,13 +817,13 @@
 
         // ---------------- ADVANCED METRICS ----------------
         function getTraitSymbol(score) {
-            if (score >= 80) return "⁺"; // Exceptionally High
-            if (score >= 60) return "₊"; // Very High
-            if (score >= 54) return "˖"; // Borderline High
-            if (score >= 50) return "￮"; // Balanced
-            if (score >= 44) return "˗"; // Borderline Low
-            if (score >= 20) return "⁻"; // Very Low
-            return "₋"; // Exceptionally Low
+            if (score >= 80) return "⁺";
+            if (score >= 60) return "₊";
+            if (score >= 54) return "˖";
+            if (score >= 50) return "￮";
+            if (score >= 44) return "˗";
+            if (score >= 20) return "⁻";
+            return "₋";
         }
 
         function calculateStructure(normalized) {
@@ -548,10 +843,8 @@
             else if (ssi >= 15) strength = "Fair";
             else strength = "Weak";
 
-            let symmetry = (psi < 10) ? "Even" : "Odd"; // Threshold of 10 for PSI
+            let symmetry = (psi < 10) ? "Even" : "Odd";
 
-            // Symbol Map
-            // Strong/Even=▾, Strong/Odd=▿, Fair/Even=●, Fair/Odd=⚬, Weak/Even=￭, Weak/Odd=⌑
             if (strength === "Strong" && symmetry === "Even") return "▾";
             if (strength === "Strong" && symmetry === "Odd") return "▿";
             if (strength === "Fair" && symmetry === "Even") return "●";
@@ -560,49 +853,88 @@
             return "⌑";
         }
 
+        // SLOAN Definitions
+        const sloanDefs = {
+            "S": { name: "Social", desc: "High Extraversion" },
+            "R": { name: "Reserved", desc: "Low Extraversion" },
+            "L": { name: "Limbic", desc: "High Neuroticism" },
+            "C": { name: "Calm", desc: "Low Neuroticism" },
+            "O": { name: "Organized", desc: "High Conscientiousness" },
+            "U": { name: "Unstructured", desc: "Low Conscientiousness" },
+            "A": { name: "Accommodating", desc: "High Agreeableness" },
+            "E": { name: "Egocentric", desc: "Low Agreeableness" },
+            "I": { name: "Inquisitive", desc: "High Openness" },
+            "N": { name: "Non-curious", desc: "Low Openness" }
+        };
+
         function showResults() {
             document.getElementById('question-view').style.display = 'none';
             document.getElementById('results-view').style.display = 'block';
-            // Removed: document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('progress-bar').style.width = '100%';
 
             const scores = calculateScores();
-            const raw = scores.raw;
             const normalized = scores.normalized;
 
             // GENERATE SLOAN CODE
-            let code = "";
+            let simpleCode = "";
+            let complexCode = "";
             let traits = {};
-            let detailedCode = "";
+            let userBreakdownHTML = "";
 
-            // Mapping Helper
             const mapTrait = (traitName, highChar, lowChar) => {
                 const val = normalized[traitName];
                 const sym = getTraitSymbol(val);
+                let char = "";
+
                 if (val >= 50) {
-                    code += highChar;
+                    char = highChar;
                     traits[highChar] = true;
-                    return highChar + sym;
                 } else {
-                    code += lowChar;
+                    char = lowChar;
                     traits[lowChar] = true;
-                    return lowChar + sym;
                 }
+
+                simpleCode += char;
+                complexCode += char + sym;
+
+                // Build Breakdown HTML
+                const def = sloanDefs[char];
+                let description = def.desc;
+
+                // Override for Balanced Scores
+                if (sym === "￮") {
+                    description = `Balanced ${traitName}`;
+                }
+
+                userBreakdownHTML += `
+                    <li>
+                        <span class="ub-letter">${char}${sym} &nbsp; ${def.name}</span>
+                        <span class="ub-desc">${description}</span>
+                    </li>
+                `;
             };
 
-            detailedCode += mapTrait("Extraversion", "S", "R");
-            detailedCode += mapTrait("Neuroticism", "L", "C");
-            detailedCode += mapTrait("Conscientiousness", "O", "U");
-            detailedCode += mapTrait("Agreeableness", "A", "E");
-            detailedCode += mapTrait("Openness", "I", "N"); // High Openness = Inquisitive (I)
+            mapTrait("Extraversion", "S", "R");
+            mapTrait("Neuroticism", "L", "C");
+            mapTrait("Conscientiousness", "O", "U");
+            mapTrait("Agreeableness", "A", "E");
+            mapTrait("Openness", "I", "N");
 
             const structSymbol = calculateStructure(normalized);
-            const finalDesignation = code + structSymbol;
 
-            document.getElementById('archetype-code').innerText = finalDesignation;
-            document.getElementById('archetype-detailed').innerText = detailedCode;
+            // Main Display: Simple Code + Symbol (e.g. RLUAI●)
+            document.getElementById('archetype-code').innerText = simpleCode + structSymbol;
+
+            // Expanded Display: Complex Code + Symbol (e.g. R⎽L˖U⎺A₊I˖●)
+            document.getElementById('complex-code-display').innerText = complexCode + structSymbol;
+
+            document.getElementById('user-breakdown').innerHTML = userBreakdownHTML;
             document.getElementById('archetype-summary').innerText = generateDescription(traits);
 
-            drawPentagon(normalized);
+            // Wait for layout to settle before drawing canvas
+            setTimeout(() => {
+                drawPentagon(normalized);
+            }, 100);
 
             // Render Bars
             const big5HTML = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"]
@@ -616,38 +948,28 @@
 
         function generateDescription(t) {
             let desc = "Analysis of your responses indicates a specific behavioral configuration. ";
-
-            // E/I
             if (t.S) desc += "You expend significant energy in social environments and prefer collective action. ";
             else desc += "You conserve energy by avoiding large groups, preferring solitary labor. ";
-
-            // N
             if (t.L) desc += "You are highly reactive to stress and environmental instability. ";
             else desc += "You maintain a stable equilibrium and are resistant to external pressure. ";
-
-            // O
             if (t.I) desc += "Cognitively, you prioritize theoretical concepts and novelty over tradition. ";
             else desc += "Cognitively, you prioritize established methods and concrete utility over abstraction. ";
-
-            // A
             if (t.A) desc += "You maintain a cooperative stance, prioritizing group cohesion over personal gain. ";
             else desc += "You maintain a competitive stance, prioritizing your own leverage over the group. ";
-
-            // C
             if (t.O) desc += "Finally, you enforce strict discipline and planning in your workflow.";
             else desc += "Finally, you utilize a flexible, spontaneous approach to task completion.";
-
             return desc;
         }
+
         function renderScoreRow(trait, score) {
             return `
             <div class="score-block">
-                <div class="score-label">
-                    <span>${trait}</span>
-                    <span>${Math.round(score)}%</span>
+                <div class="score-header">
+                    <span class="score-name">${trait}</span>
+                    <span class="score-val">${Math.round(score)}%</span>
                 </div>
-                <div class="score-bar-bg">
-                    <div class="score-bar-fill" style="width: ${score}%"></div>
+                <div class="score-track">
+                    <div class="score-fill" style="width: ${score}%"></div>
                 </div>
             </div>
         `;
@@ -666,9 +988,7 @@
             QUESTIONS.forEach((q, i) => {
                 if (raw[q.trait] !== undefined) {
                     let val = answers[i];
-                    // default to neutral (3) if not answered to avoid NaN
                     if (val === null || val === undefined) val = 3;
-
                     if (q.reverse) val = 6 - val;
                     raw[q.trait] += val;
                     max[q.trait] += 5;
@@ -683,30 +1003,66 @@
                 }
                 const minPossible = max[t] / 5;
                 normalized[t] = ((raw[t] - minPossible) / (max[t] - minPossible)) * 100;
-                // Clamp just in case
                 normalized[t] = Math.max(0, Math.min(100, normalized[t]));
             }
             return { raw, normalized };
         }
 
+        function redirectToForm() {
+            const scores = calculateScores().normalized;
+
+            // Google Form Entry IDs
+            const entryIDs = {
+                "Narcissism": "1132147578",
+                "Machiavellianism": "585559511",
+                "Psychopathy": "1176101371",
+                "Openness": "1188908959",
+                "Conscientiousness": "1957203118",
+                "Extraversion": "516165326",
+                "Agreeableness": "672976918",
+                "Neuroticism": "1986475625"
+            };
+
+            const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeOcyyRUkr3m0SHtZqIfsjkx3I0bUtlOf6UHcoA_Evl8_FGzA/viewform?usp=pp_url";
+
+            let params = "";
+            for (const [trait, id] of Object.entries(entryIDs)) {
+                const val = Math.round(scores[trait]);
+                params += `&entry.${id}=${val}`;
+            }
+
+            window.location.href = baseUrl + params;
+        }
+
         function drawPentagon(normalizedScores) {
             const canvas = document.getElementById('oceanCanvas');
+            const container = canvas.parentElement;
+
+            // Handle High DPI
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.width * dpr; // Square aspect ratio
+
             const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.width;
             const cx = width / 2;
             const cy = height / 2;
-            const r = 100;
+            const r = (width / 2) - 30; // Padding
 
             ctx.clearRect(0, 0, width, height);
 
             // Axes
             const axes = [
-                { label: "O", angle: -Math.PI / 2, val: normalizedScores["Openness"], color: "#38bdf8" }, // Cyan
-                { label: "C", angle: -Math.PI / 2 + (2 * Math.PI / 5), val: normalizedScores["Conscientiousness"], color: "#fbbf24" }, // Amber
-                { label: "E", angle: -Math.PI / 2 + 2 * (2 * Math.PI / 5), val: normalizedScores["Extraversion"], color: "#f87171" }, // Red-Orange
-                { label: "A", angle: -Math.PI / 2 + 3 * (2 * Math.PI / 5), val: normalizedScores["Agreeableness"], color: "#4ade80" }, // Green
-                { label: "N", angle: -Math.PI / 2 + 4 * (2 * Math.PI / 5), val: normalizedScores["Neuroticism"], color: "#a78bfa" } // Purple
+                { label: "O", angle: -Math.PI / 2, val: normalizedScores["Openness"], color: "#38bdf8" },
+                { label: "C", angle: -Math.PI / 2 + (2 * Math.PI / 5), val: normalizedScores["Conscientiousness"], color: "#fbbf24" },
+                { label: "E", angle: -Math.PI / 2 + 2 * (2 * Math.PI / 5), val: normalizedScores["Extraversion"], color: "#f87171" },
+                { label: "A", angle: -Math.PI / 2 + 3 * (2 * Math.PI / 5), val: normalizedScores["Agreeableness"], color: "#4ade80" },
+                { label: "N", angle: -Math.PI / 2 + 4 * (2 * Math.PI / 5), val: normalizedScores["Neuroticism"], color: "#a78bfa" }
             ];
 
             // Grid
@@ -725,7 +1081,7 @@
 
             // Data Shape
             ctx.beginPath();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             axes.forEach((axis, i) => {
@@ -739,41 +1095,57 @@
             ctx.fill();
             ctx.stroke();
 
-            // Draw Points
+            // Draw Points & Labels
+            ctx.font = 'bold 12px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
             axes.forEach(axis => {
                 const val = axis.val || 0;
                 const dist = (val / 100) * r;
                 const x = cx + Math.cos(axis.angle) * dist;
                 const y = cy + Math.sin(axis.angle) * dist;
 
+                // Point
                 ctx.beginPath();
-                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
                 ctx.fillStyle = axis.color;
                 ctx.fill();
-                // Optional: border for contrast
-                ctx.lineWidth = 1;
                 ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
                 ctx.stroke();
-            });
 
-            // Labels
-            ctx.fillStyle = '#666';
-            ctx.font = '12px JetBrains Mono';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            axes.forEach(axis => {
-                const x = cx + Math.cos(axis.angle) * (r + 20);
-                const y = cy + Math.sin(axis.angle) * (r + 20);
-                ctx.fillStyle = axis.color; // Match label color to point
-                ctx.fillText(axis.label, x, y);
+                // Label
+                const lx = cx + Math.cos(axis.angle) * (r + 20);
+                const ly = cy + Math.sin(axis.angle) * (r + 20);
+                ctx.fillStyle = axis.color;
+                ctx.fillText(axis.label, lx, ly);
             });
         }
 
-        renderQuestion();
         function toggleSloanInfo() {
             const el = document.getElementById('sloan-info');
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            const btn = document.getElementById('archetype-detailed');
+
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.innerText = "[ EXPAND DESIGNATION ANALYSIS ]";
+            } else {
+                el.style.display = 'block';
+                btn.innerText = "[ COLLAPSE ANALYSIS ]";
+            }
         }
+
+        // Init
+        renderQuestion();
+
+        // Handle Resize for Canvas
+        window.addEventListener('resize', () => {
+            if (document.getElementById('results-view').style.display === 'block') {
+                const scores = calculateScores();
+                drawPentagon(scores.normalized);
+            }
+        });
     </script>
 </body>
 
