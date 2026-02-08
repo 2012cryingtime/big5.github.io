@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metric Assessment Unit v2.4</title>
+    <title>Metric Assessment Unit v2.5</title>
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -362,8 +362,9 @@
 
         .legend-table .sym {
             color: #fff;
-            font-size: 1rem;
+            font-size: 1.2rem;
             width: 30px;
+            font-weight: 300;
         }
 
         /* Data Grid Layout */
@@ -560,11 +561,11 @@
                                 <!-- Intensity Table -->
                                 <table class="legend-table">
                                     <tr>
-                                        <td class="sym">⁺</td>
+                                        <td class="sym">×</td>
                                         <td>Exceptionally High</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">₊</td>
+                                        <td class="sym">⁺</td>
                                         <td>Very High</td>
                                     </tr>
                                     <tr>
@@ -576,15 +577,15 @@
                                         <td>Balanced</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">˗</td>
+                                        <td class="sym">⎻</td>
                                         <td>Borderline Low</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⁻</td>
+                                        <td class="sym">⎺</td>
                                         <td>Very Low</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">₋</td>
+                                        <td class="sym">⎽</td>
                                         <td>Exceptionally Low</td>
                                     </tr>
                                 </table>
@@ -725,6 +726,8 @@
             { id: 58, text: "I function effectively under high demand.", trait: "Neuroticism", reverse: true },
 
             // --- DARK TRIAD (12 Items) ---
+            // REVISED: Framed as "Rational/Pragmatic" to bypass ego defense mechanisms.
+
             // Machiavellianism: Reframed as "Strategic Realism" and "Information Control."
             { id: 41, text: "Complete transparency is a strategic error in most negotiations.", trait: "Machiavellianism", reverse: false },
             { id: 42, text: "To achieve significant goals, one must often tell people what they wish to hear.", trait: "Machiavellianism", reverse: false },
@@ -817,13 +820,18 @@
 
         // ---------------- ADVANCED METRICS ----------------
         function getTraitSymbol(score) {
-            if (score >= 80) return "⁺";
-            if (score >= 60) return "₊";
-            if (score >= 54) return "˖";
-            if (score >= 50) return "￮";
-            if (score >= 44) return "˗";
-            if (score >= 20) return "⁻";
-            return "₋";
+            // HIGH END
+            if (score >= 80) return "×";  // Exceptionally High
+            if (score >= 60) return "⁺";  // Very High
+            if (score >= 54) return "˖";  // Borderline High
+
+            // CENTER
+            if (score >= 46) return "￮";  // Balanced
+
+            // LOW END
+            if (score >= 40) return "⎻";  // Borderline Low
+            if (score >= 20) return "⎺";  // Very Low
+            return "⎽";                   // Exceptionally Low
         }
 
         function calculateStructure(normalized) {
@@ -980,7 +988,7 @@
                 "Neuroticism": 0, "Extraversion": 0, "Openness": 0, "Agreeableness": 0, "Conscientiousness": 0,
                 "Machiavellianism": 0, "Psychopathy": 0, "Narcissism": 0
             };
-            const max = {
+            const counts = {
                 "Neuroticism": 0, "Extraversion": 0, "Openness": 0, "Agreeableness": 0, "Conscientiousness": 0,
                 "Machiavellianism": 0, "Psychopathy": 0, "Narcissism": 0
             };
@@ -991,20 +999,64 @@
                     if (val === null || val === undefined) val = 3;
                     if (q.reverse) val = 6 - val;
                     raw[q.trait] += val;
-                    max[q.trait] += 5;
+                    counts[q.trait]++;
                 }
             });
 
             const normalized = {};
+
+            // ──────────────────────────────────────────────────────────
+            // DARK TRIAD CALIBRATION
+            // ──────────────────────────────────────────────────────────
+            // Each DT trait's questions have different "difficulty" levels
+            // due to social desirability framing. An average person responds
+            // differently to each set:
+            //
+            //   Machiavellianism: Items sound pragmatic/rational, so average
+            //     people tend to agree (~3.6/5). expectedMean = 14.5 out of 20.
+            //
+            //   Psychopathy: Items are more confrontational, so average people
+            //     tend to mildly disagree (~2.4/5). expectedMean = 9.5 out of 20.
+            //
+            //   Narcissism: Moderate difficulty. Average people are near neutral
+            //     but lean slightly agree (~3.25/5). expectedMean = 13 out of 20.
+            //
+            // We use piecewise linear normalization so that each trait's
+            // expected average raw score maps to exactly 50, while 
+            // preserving 0 at minimum and 100 at maximum.
+            // ──────────────────────────────────────────────────────────
+            const dtCalibration = {
+                "Machiavellianism": 14.5,
+                "Psychopathy": 9.5,
+                "Narcissism": 13
+            };
+
             for (let t in raw) {
-                if (max[t] === 0) {
+                const count = counts[t];
+                if (count === 0) {
                     normalized[t] = 0;
                     continue;
                 }
-                const minPossible = max[t] / 5;
-                normalized[t] = ((raw[t] - minPossible) / (max[t] - minPossible)) * 100;
+
+                const minRaw = count;         // All 1s
+                const maxRaw = count * 5;     // All 5s
+
+                if (dtCalibration[t] !== undefined) {
+                    // Piecewise linear: expectedMean → 50
+                    const em = dtCalibration[t];
+                    if (raw[t] <= em) {
+                        normalized[t] = ((raw[t] - minRaw) / (em - minRaw)) * 50;
+                    } else {
+                        normalized[t] = 50 + ((raw[t] - em) / (maxRaw - em)) * 50;
+                    }
+                } else {
+                    // Big Five: standard linear 0-100
+                    normalized[t] = ((raw[t] - minRaw) / (maxRaw - minRaw)) * 100;
+                }
+
                 normalized[t] = Math.max(0, Math.min(100, normalized[t]));
             }
+
             return { raw, normalized };
         }
 
