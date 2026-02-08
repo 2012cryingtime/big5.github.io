@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metric Assessment Unit v2.0</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #111111;
+            --text-primary: #e5e5e5;
+            --text-muted: #666666;
+            --border: #333333;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+            /* Signal Colors */
+            --val-1: #ff0000;
+            /* Red */
+            --val-2: #ff9900;
+            /* Orange */
+            --val-3: #525252;
+            /* Neutral */
+            --val-4: #c8ff00;
+            /* Lime */
+            --val-5: #00ff0d;
+            /* Green */
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+        }
+
+        /* Bionic Reading */
+        .bionic-bold {
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        /* Progress */
+        .progress-bar-container {
+            width: 100%;
+            height: 2px;
+            background-color: #222;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--text-primary);
+            transition: width 0.2s ease;
+        }
+
+        /* Typography */
+        .question-text {
+            font-size: 1.6rem;
+            margin-bottom: 3rem;
+            text-align: left;
+            line-height: 1.4;
+            min-height: 4em;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+
+        /* Input Grid */
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .input-rect {
+            height: 70px;
+            background-color: var(--card-bg);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            transition: background-color 0.1s;
+            font-family: var(--font-mono);
+            position: relative;
+        }
+
+        .input-rect:hover {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        /* Selected State */
+        .input-rect.selected {
+            background-color: #222;
+            color: #fff;
+            border-bottom: 2px solid #fff;
+        }
+
+        /* Colored Dots */
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-bottom: 8px;
+        }
+
+        /* Navigation */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            height: 40px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        .jump-btn {
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        /* Results View */
+        #results-view {
+            display: none;
+            width: 100%;
+            overflow-y: auto;
+            height: 100%;
+            padding-top: 1rem;
+        }
+
+        .result-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .archetype-code {
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .archetype-summary {
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #111;
+            border-left: 2px solid #fff;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .score-block {
+            margin-bottom: 0.5rem;
+        }
+
+        .score-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: #222;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: #fff;
+        }
+
+        canvas {
+            border: 1px solid var(--border);
+            background: #0f0f0f;
+            width: 100%;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+
+    <div class="container">
+        <!-- Question View -->
+        <div id="question-view">
+            <div class="nav-controls" style="margin-bottom: 1rem; justify-content: flex-end;">
+                <span id="question-counter">INIT...</span>
+            </div>
+
+            <div class="question-text" id="question-text"></div>
+
+            <div class="input-group">
+                <div class="input-rect" onclick="handleInput(1)" data-val="1">
+                    <div class="dot" style="background-color: var(--val-1);"></div>
+                </div>
+                <div class="input-rect" onclick="handleInput(2)" data-val="2">
+                    <div class="dot" style="background-color: var(--val-2);"></div>
+                </div>
+                <div class="input-rect" onclick="handleInput(3)" data-val="3">
+                    <div class="dot" style="background-color: var(--val-3);"></div>
+                </div>
+                <div class="input-rect" onclick="handleInput(4)" data-val="4">
+                    <div class="dot" style="background-color: var(--val-4);"></div>
+                </div>
+                <div class="input-rect" onclick="handleInput(5)" data-val="5">
+                    <div class="dot" style="background-color: var(--val-5);"></div>
+                </div>
+            </div>
+
+            <div class="nav-controls">
+                <button class="nav-btn" id="back-btn" onclick="prevQuestion()" style="visibility: hidden;">[ PREV
+                    ]</button>
+                <button class="nav-btn jump-btn" id="jump-btn" onclick="jumpToFurthest()" style="display: none;">[
+                    RETURN TO LATEST ]</button>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view">
+            <!-- RESULTS HEADER -->
+            <div class="results-header">
+                <div>DESIGNATION RECOGNIZED</div>
+                <div class="archetype-code" id="archetype-code"></div>
+                <div class="archetype-detailed" id="archetype-detailed" onclick="toggleSloanInfo()"
+                    style="cursor: pointer; opacity: 0.7; font-size: 1.2rem; margin-top: 5px;"></div>
+                <div class="archetype-summary" id="archetype-summary"></div>
+
+                <div id="sloan-info"
+                    style="display: none; text-align: left; background: rgba(255,255,255,0.05); padding: 20px; margin-top: 20px; border: 1px solid #333; font-size: 0.9rem;">
+                    <h3 style="color: var(--accent); margin-top: 0;">SLOAN NOTATION</h3>
+                    <p><strong>Primary Letters:</strong></p>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li><strong>S/R</strong> (Social/Reserved) - Extraversion</li>
+                        <li><strong>L/C</strong> (Limbic/Calm) - Neuroticism</li>
+                        <li><strong>O/U</strong> (Organized/Unstructured) - Conscientiousness</li>
+                        <li><strong>A/E</strong> (Accommodating/Egocentric) - Agreeableness</li>
+                        <li><strong>N/I</strong> (Non-curious/Inquisitive) - Openness</li>
+                    </ul>
+                    <p><strong>Intensity Modifiers:</strong></p>
+                    <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: 1fr 1fr;">
+                        <li>⁺ Exceptionally High (80-100)</li>
+                        <li>˖ Very High (60-79)</li>
+                        <li>₊ Borderline High (54-59)</li>
+                        <li>￮ Balanced (50-53)</li>
+                        <li>⁻ Borderline Low (44-49)</li>
+                        <li>˗ Very Low (20-43)</li>
+                        <li>₋ Exceptionally Low (0-19)</li>
+                    </ul>
+                    <p><strong>Structural Match (End Symbol):</strong></p>
+                    <p>Indicates personality strength (deviation from average) and symmetry (consistency of deviation).
+                    </p>
+                    <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: 1fr 1fr;">
+                        <li>▾ Strong / Balanced</li>
+                        <li>▿ Strong / Uneven</li>
+                        <li>● Fair / Balanced</li>
+                        <li>⚬ Fair / Uneven</li>
+                        <li>￭ Weak / Balanced</li>
+                        <li>⌑ Weak / Uneven</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="data-grid">
+                <div>
+                    <div class="score-label" style="margin-bottom: 1rem;">Metric Visualization</div>
+                    <canvas id="oceanCanvas" width="300" height="300"></canvas>
+                </div>
+
+                <div>
+                    <div class="score-label" style="margin-bottom: 1rem;">Component Analysis</div>
+                    <div id="big5-scores"></div>
+
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                        <div class="score-label" style="margin-bottom: 1rem; color: #888;">Dark Triad Indices</div>
+                        <div id="dt-scores"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="nav-btn"
+                style="width:100%; margin-top:3rem; border:1px solid #333; padding:1rem; text-align:center;"
+                onclick="location.reload()">[ RESTART SEQUENCE ]</button>
+        </div>
+    </div>
+
+    <script>
+        // ---------------- MATERIALIST DATA STRUCTURE ----------------
+        // Questions rephrased to focus on material behavior, labor, and social structure.
+        // ---------------- MATERIALIST DATA STRUCTURE ----------------
+        // Questions rephrased to focus on material behavior, labor, and social structure.
+        // ORDER: Openness -> Conscientiousness -> Extraversion -> Agreeableness -> Neuroticism -> Dark Triad
+        // ---------------- MATERIALIST DATA STRUCTURE ----------------
+        // Questions rephrased to focus on material behavior, labor, and social structure.
+        // ORDER: Openness -> Conscientiousness -> Extraversion -> Agreeableness -> Neuroticism -> Dark Triad
+        // WEIGHTING: Big 5 traits have 10 items each. Dark Triad has 12 items (4 each).
+        const QUESTIONS = [
+            // --- OPENNESS (10 Items) ---
+            { id: 17, text: "I frequently read dense, difficult texts.", trait: "Openness", reverse: false },
+            { id: 18, text: "I avoid theoretical discussions.", trait: "Openness", reverse: true },
+            { id: 19, text: "I spend time visualizing abstract possibilities.", trait: "Openness", reverse: false },
+            { id: 20, text: "I struggle with purely theoretical concepts.", trait: "Openness", reverse: true },
+            { id: 21, text: "I am known for suggesting radical alternatives.", trait: "Openness", reverse: false },
+            { id: 22, text: "I prefer established data over speculation.", trait: "Openness", reverse: true },
+            { id: 23, text: "I disassemble systems to understand their core mechanics.", trait: "Openness", reverse: false },
+            { id: 24, text: "I prefer to improvise rather than follow a script.", trait: "Openness", reverse: false },
+            { id: 59, text: "I test unproven methods.", trait: "Openness", reverse: false },
+            { id: 60, text: "I build my own tools or workflows.", trait: "Openness", reverse: false },
+
+            // --- CONSCIENTIOUSNESS (10 Items) ---
+            { id: 33, text: "I often complete work well ahead of schedule.", trait: "Conscientiousness", reverse: false },
+            { id: 34, text: "I leave tools or items out of place.", trait: "Conscientiousness", reverse: true },
+            { id: 35, text: "I operate on a strict timetable.", trait: "Conscientiousness", reverse: false },
+            { id: 36, text: "I live in a cluttered environment.", trait: "Conscientiousness", reverse: true },
+            { id: 37, text: "I am a perfectionist with every detail.", trait: "Conscientiousness", reverse: false },
+            { id: 38, text: "I avoid responsibilities.", trait: "Conscientiousness", reverse: true },
+            { id: 39, text: "I plan for contingencies.", trait: "Conscientiousness", reverse: false },
+            { id: 40, text: "I act without a plan.", trait: "Conscientiousness", reverse: true },
+            { id: 53, text: "I track my progress towards long-term goals.", trait: "Conscientiousness", reverse: false },
+            { id: 54, text: "I ensure the group stays on task.", trait: "Conscientiousness", reverse: false },
+
+            // --- EXTRAVERSION (10 Items) ---
+            { id: 9, text: "I enjoy the energy of a crowd.", trait: "Extraversion", reverse: false }, // "Seek out" -> "Enjoy energy" (Easier)
+            { id: 10, text: "I avoid drawing attention to myself.", trait: "Extraversion", reverse: true }, // "Prefer background" -> "Avoid drawing attention"
+            { id: 11, text: "I am comfortable starting conversations.", trait: "Extraversion", reverse: false }, // "Initiate" -> "Comfortable starting"
+            { id: 12, text: "I keep my thoughts to myself in groups.", trait: "Extraversion", reverse: true }, // "Listen rather than speak" -> "Keep thoughts to self" (Harder to agree)
+            { id: 13, text: "I enjoy entertaining others.", trait: "Extraversion", reverse: false }, // "Perform" -> "Entertain"
+            { id: 14, text: "Socializing leaves me completely exhausted.", trait: "Extraversion", reverse: true }, // "Require solitude" -> "Completely exhausted" (Harder to agree)
+            { id: 15, text: "I thrive in high-activity environments.", trait: "Extraversion", reverse: false },
+            { id: 16, text: "I cannot focus if others are nearby.", trait: "Extraversion", reverse: true }, // "Best work in isolation" -> "Cannot focus" (Harder to agree)
+            { id: 61, text: "I take command in group settings.", trait: "Extraversion", reverse: false },
+            { id: 62, text: "I maintain a wide network of contacts.", trait: "Extraversion", reverse: false },
+
+            // --- AGREEABLENESS (10 Items) ---
+            { id: 25, text: "I trust strangers until proven otherwise.", trait: "Agreeableness", reverse: false },
+            { id: 26, text: "I can be cold and distant.", trait: "Agreeableness", reverse: true },
+            { id: 27, text: "I interrupt my own workflow to help others.", trait: "Agreeableness", reverse: false },
+            { id: 28, text: "I point out the faults of others.", trait: "Agreeableness", reverse: true },
+            { id: 29, text: "I deflect praise to others.", trait: "Agreeableness", reverse: false },
+            { id: 30, text: "I view myself as superior to my peers.", trait: "Agreeableness", reverse: true },
+            { id: 31, text: "I actively campaign for universal welfare.", trait: "Agreeableness", reverse: false },
+            { id: 32, text: "I enforce rules regardless of feelings.", trait: "Agreeableness", reverse: true },
+            { id: 63, text: "I forgive debts or slights.", trait: "Agreeableness", reverse: false },
+            { id: 64, text: "I always put the group's needs before my own ambitions.", trait: "Agreeableness", reverse: false },
+
+            // --- NEUROTICISM (10 Items) ---
+            { id: 1, text: "I experience physical symptoms of stress.", trait: "Neuroticism", reverse: false },
+            { id: 2, text: "I maintain composure during crises.", trait: "Neuroticism", reverse: true },
+            { id: 3, text: "I express frustration visibly.", trait: "Neuroticism", reverse: false },
+            { id: 4, text: "I maintain a consistent mood.", trait: "Neuroticism", reverse: true },
+            { id: 5, text: "My energy levels fluctuate unpredictably.", trait: "Neuroticism", reverse: false },
+            { id: 6, text: "I remain unconcerned by uncertainty.", trait: "Neuroticism", reverse: true },
+            { id: 7, text: "I suffer from physical tension.", trait: "Neuroticism", reverse: false },
+            { id: 8, text: "I adapt quickly to disruptions.", trait: "Neuroticism", reverse: true },
+            { id: 57, text: "I shut down when overloaded.", trait: "Neuroticism", reverse: false },
+            { id: 58, text: "I function effectively under high demand.", trait: "Neuroticism", reverse: true },
+
+            // --- DARK TRIAD (12 Items) ---
+            { id: 41, text: "It is smart to use flattery to get what you want.", trait: "Machiavellianism", reverse: false }, // Softer than "I use compliments..."
+            { id: 42, text: "I know how to steer a conversation to my advantage.", trait: "Machiavellianism", reverse: false },
+            { id: 43, text: "I am careful about how much information I reveal.", trait: "Machiavellianism", reverse: false }, // Softer than "Withhold to get ahead"
+            { id: 44, text: "I evaluate relationships potential utility.", trait: "Machiavellianism", reverse: false },
+            { id: 45, text: "I genuinely lack empathy for others' problems.", trait: "Psychopathy", reverse: false }, // Harder than "Results over feelings"
+            { id: 46, text: "I would cheat if I knew I wouldn't get caught.", trait: "Psychopathy", reverse: false },
+            { id: 47, text: "I never feel remorse for my actions.", trait: "Psychopathy", reverse: false },
+            { id: 48, text: "I enjoy manipulating people for fun.", trait: "Psychopathy", reverse: false }, // Very hard P item
+            { id: 49, text: "I deserve more respect than the average person.", trait: "Narcissism", reverse: false },
+            { id: 50, text: "I cultivate my physical appearance for effect.", trait: "Narcissism", reverse: false },
+            { id: 51, text: "I expect special favors from others.", trait: "Narcissism", reverse: false },
+            { id: 52, text: "I seek public acclaim.", trait: "Narcissism", reverse: false }
+        ];
+        // ---------------- LOGIC ----------------
+        let currentQIndex = 0;
+        let furthestQIndex = 0;
+        const answers = new Array(QUESTIONS.length).fill(null);
+
+        function applyBionic(text) {
+            return text.split(' ').map(word => {
+                const splitIndex = Math.ceil(word.length / 2);
+                const boldPart = word.substring(0, splitIndex);
+                const normalPart = word.substring(splitIndex);
+                return `<span class="bionic-bold">${boldPart}</span>${normalPart}`;
+            }).join(' ');
+        }
+
+        function renderQuestion() {
+            if (currentQIndex >= QUESTIONS.length) {
+                showResults();
+                return;
+            }
+
+            // Update Furthest
+            if (currentQIndex > furthestQIndex) furthestQIndex = currentQIndex;
+
+            const q = QUESTIONS[currentQIndex];
+            const container = document.getElementById('question-text');
+            container.innerHTML = applyBionic(q.text);
+
+            // Progress
+            const progress = (currentQIndex / QUESTIONS.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('question-counter').innerText = `ITEM ${currentQIndex + 1} / ${QUESTIONS.length}`;
+
+            // Nav Buttons
+            document.getElementById('back-btn').style.visibility = currentQIndex > 0 ? 'visible' : 'hidden';
+
+            // Jump Button Logic
+            const jumpBtn = document.getElementById('jump-btn');
+            if (currentQIndex < furthestQIndex) {
+                jumpBtn.style.display = 'block';
+                jumpBtn.innerText = `[ RETURN TO ${furthestQIndex + 1} ]`;
+            } else {
+                jumpBtn.style.display = 'none';
+            }
+
+            // Highlight Selected Answer
+            document.querySelectorAll('.input-rect').forEach(el => {
+                el.classList.remove('selected');
+                if (answers[currentQIndex] !== null && parseInt(el.dataset.val) === answers[currentQIndex]) {
+                    el.classList.add('selected');
+                }
+            });
+        }
+
+        function handleInput(val) {
+            answers[currentQIndex] = val;
+            currentQIndex++;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQIndex > 0) {
+                currentQIndex--;
+                renderQuestion();
+            }
+        }
+
+        function jumpToFurthest() {
+            currentQIndex = furthestQIndex;
+            renderQuestion();
+        }
+
+        // ---------------- ADVANCED METRICS ----------------
+        function getTraitSymbol(score) {
+            if (score >= 80) return "⁺"; // Exceptionally High
+            if (score >= 60) return "₊"; // Very High
+            if (score >= 54) return "˖"; // Borderline High
+            if (score >= 50) return "￮"; // Balanced
+            if (score >= 44) return "˗"; // Borderline Low
+            if (score >= 20) return "⁻"; // Very Low
+            return "₋"; // Exceptionally Low
+        }
+
+        function calculateStructure(normalized) {
+            const traits = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"];
+            const deviations = traits.map(t => Math.abs(normalized[t] - 50));
+
+            // SSI: Average deviation
+            const ssi = deviations.reduce((a, b) => a + b, 0) / deviations.length;
+
+            // PSI: Standard Deviation of deviations
+            const meanDev = ssi;
+            const variance = deviations.reduce((a, b) => a + Math.pow(b - meanDev, 2), 0) / deviations.length;
+            const psi = Math.sqrt(variance);
+
+            let strength = "";
+            if (ssi >= 25) strength = "Strong";
+            else if (ssi >= 15) strength = "Fair";
+            else strength = "Weak";
+
+            let symmetry = (psi < 10) ? "Even" : "Odd"; // Threshold of 10 for PSI
+
+            // Symbol Map
+            // Strong/Even=▾, Strong/Odd=▿, Fair/Even=●, Fair/Odd=⚬, Weak/Even=￭, Weak/Odd=⌑
+            if (strength === "Strong" && symmetry === "Even") return "▾";
+            if (strength === "Strong" && symmetry === "Odd") return "▿";
+            if (strength === "Fair" && symmetry === "Even") return "●";
+            if (strength === "Fair" && symmetry === "Odd") return "⚬";
+            if (strength === "Weak" && symmetry === "Even") return "￭";
+            return "⌑";
+        }
+
+        function showResults() {
+            document.getElementById('question-view').style.display = 'none';
+            document.getElementById('results-view').style.display = 'block';
+            // Removed: document.getElementById('progress-bar').style.width = '100%';
+
+            const scores = calculateScores();
+            const raw = scores.raw;
+            const normalized = scores.normalized;
+
+            // GENERATE SLOAN CODE
+            let code = "";
+            let traits = {};
+            let detailedCode = "";
+
+            // Mapping Helper
+            const mapTrait = (traitName, highChar, lowChar) => {
+                const val = normalized[traitName];
+                const sym = getTraitSymbol(val);
+                if (val >= 50) {
+                    code += highChar;
+                    traits[highChar] = true;
+                    return highChar + sym;
+                } else {
+                    code += lowChar;
+                    traits[lowChar] = true;
+                    return lowChar + sym;
+                }
+            };
+
+            detailedCode += mapTrait("Extraversion", "S", "R");
+            detailedCode += mapTrait("Neuroticism", "L", "C");
+            detailedCode += mapTrait("Conscientiousness", "O", "U");
+            detailedCode += mapTrait("Agreeableness", "A", "E");
+            detailedCode += mapTrait("Openness", "I", "N"); // High Openness = Inquisitive (I)
+
+            const structSymbol = calculateStructure(normalized);
+            const finalDesignation = code + structSymbol;
+
+            document.getElementById('archetype-code').innerText = finalDesignation;
+            document.getElementById('archetype-detailed').innerText = detailedCode;
+            document.getElementById('archetype-summary').innerText = generateDescription(traits);
+
+            drawPentagon(normalized);
+
+            // Render Bars
+            const big5HTML = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"]
+                .map(t => renderScoreRow(t, normalized[t])).join('');
+            document.getElementById('big5-scores').innerHTML = big5HTML;
+
+            const dtHTML = ["Machiavellianism", "Narcissism", "Psychopathy"]
+                .map(t => renderScoreRow(t, normalized[t])).join('');
+            document.getElementById('dt-scores').innerHTML = dtHTML;
+        }
+
+        function generateDescription(t) {
+            let desc = "Analysis of your responses indicates a specific behavioral configuration. ";
+
+            // E/I
+            if (t.S) desc += "You expend significant energy in social environments and prefer collective action. ";
+            else desc += "You conserve energy by avoiding large groups, preferring solitary labor. ";
+
+            // N
+            if (t.L) desc += "You are highly reactive to stress and environmental instability. ";
+            else desc += "You maintain a stable equilibrium and are resistant to external pressure. ";
+
+            // O
+            if (t.I) desc += "Cognitively, you prioritize theoretical concepts and novelty over tradition. ";
+            else desc += "Cognitively, you prioritize established methods and concrete utility over abstraction. ";
+
+            // A
+            if (t.A) desc += "You maintain a cooperative stance, prioritizing group cohesion over personal gain. ";
+            else desc += "You maintain a competitive stance, prioritizing your own leverage over the group. ";
+
+            // C
+            if (t.O) desc += "Finally, you enforce strict discipline and planning in your workflow.";
+            else desc += "Finally, you utilize a flexible, spontaneous approach to task completion.";
+
+            return desc;
+        }
+        function renderScoreRow(trait, score) {
+            return `
+            <div class="score-block">
+                <div class="score-label">
+                    <span>${trait}</span>
+                    <span>${Math.round(score)}%</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div class="score-bar-fill" style="width: ${score}%"></div>
+                </div>
+            </div>
+        `;
+        }
+
+        function calculateScores() {
+            const raw = {
+                "Neuroticism": 0, "Extraversion": 0, "Openness": 0, "Agreeableness": 0, "Conscientiousness": 0,
+                "Machiavellianism": 0, "Psychopathy": 0, "Narcissism": 0
+            };
+            const max = {
+                "Neuroticism": 0, "Extraversion": 0, "Openness": 0, "Agreeableness": 0, "Conscientiousness": 0,
+                "Machiavellianism": 0, "Psychopathy": 0, "Narcissism": 0
+            };
+
+            QUESTIONS.forEach((q, i) => {
+                if (raw[q.trait] !== undefined) {
+                    let val = answers[i];
+                    // default to neutral (3) if not answered to avoid NaN
+                    if (val === null || val === undefined) val = 3;
+
+                    if (q.reverse) val = 6 - val;
+                    raw[q.trait] += val;
+                    max[q.trait] += 5;
+                }
+            });
+
+            const normalized = {};
+            for (let t in raw) {
+                if (max[t] === 0) {
+                    normalized[t] = 0;
+                    continue;
+                }
+                const minPossible = max[t] / 5;
+                normalized[t] = ((raw[t] - minPossible) / (max[t] - minPossible)) * 100;
+                // Clamp just in case
+                normalized[t] = Math.max(0, Math.min(100, normalized[t]));
+            }
+            return { raw, normalized };
+        }
+
+        function drawPentagon(normalizedScores) {
+            const canvas = document.getElementById('oceanCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const cx = width / 2;
+            const cy = height / 2;
+            const r = 100;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Axes
+            const axes = [
+                { label: "O", angle: -Math.PI / 2, val: normalizedScores["Openness"], color: "#38bdf8" }, // Cyan
+                { label: "C", angle: -Math.PI / 2 + (2 * Math.PI / 5), val: normalizedScores["Conscientiousness"], color: "#fbbf24" }, // Amber
+                { label: "E", angle: -Math.PI / 2 + 2 * (2 * Math.PI / 5), val: normalizedScores["Extraversion"], color: "#f87171" }, // Red-Orange
+                { label: "A", angle: -Math.PI / 2 + 3 * (2 * Math.PI / 5), val: normalizedScores["Agreeableness"], color: "#4ade80" }, // Green
+                { label: "N", angle: -Math.PI / 2 + 4 * (2 * Math.PI / 5), val: normalizedScores["Neuroticism"], color: "#a78bfa" } // Purple
+            ];
+
+            // Grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            [0.2, 0.4, 0.6, 0.8, 1].forEach(scale => {
+                ctx.beginPath();
+                axes.forEach((axis, i) => {
+                    const x = cx + Math.cos(axis.angle) * r * scale;
+                    const y = cy + Math.sin(axis.angle) * r * scale;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                });
+                ctx.closePath();
+                ctx.stroke();
+            });
+
+            // Data Shape
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            axes.forEach((axis, i) => {
+                const val = axis.val || 0;
+                const dist = (val / 100) * r;
+                const x = cx + Math.cos(axis.angle) * dist;
+                const y = cy + Math.sin(axis.angle) * dist;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw Points
+            axes.forEach(axis => {
+                const val = axis.val || 0;
+                const dist = (val / 100) * r;
+                const x = cx + Math.cos(axis.angle) * dist;
+                const y = cy + Math.sin(axis.angle) * dist;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = axis.color;
+                ctx.fill();
+                // Optional: border for contrast
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#000';
+                ctx.stroke();
+            });
+
+            // Labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            axes.forEach(axis => {
+                const x = cx + Math.cos(axis.angle) * (r + 20);
+                const y = cy + Math.sin(axis.angle) * (r + 20);
+                ctx.fillStyle = axis.color; // Match label color to point
+                ctx.fillText(axis.label, x, y);
+            });
+        }
+
+        renderQuestion();
+        function toggleSloanInfo() {
+            const el = document.getElementById('sloan-info');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</body>
+
+</html>
