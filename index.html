@@ -558,35 +558,47 @@
                                     overall profile aligns with this archetype.
                                 </div>
 
-                                <!-- Intensity Table -->
+                                <!-- Decile Table -->
                                 <table class="legend-table">
                                     <tr>
-                                        <td class="sym">×</td>
-                                        <td>Exceptionally High</td>
+                                        <td class="sym">⁹</td>
+                                        <td>90% - 100%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⁺</td>
-                                        <td>Very High</td>
+                                        <td class="sym">⁸</td>
+                                        <td>80% - 89%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">˖</td>
-                                        <td>Borderline High</td>
+                                        <td class="sym">⁷</td>
+                                        <td>70% - 79%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">￮</td>
-                                        <td>Balanced</td>
+                                        <td class="sym">⁶</td>
+                                        <td>60% - 69%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⎻</td>
-                                        <td>Borderline Low</td>
+                                        <td class="sym">⁵</td>
+                                        <td>50% - 59%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⎺</td>
-                                        <td>Very Low</td>
+                                        <td class="sym">⁴</td>
+                                        <td>40% - 49%</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⎽</td>
-                                        <td>Exceptionally Low</td>
+                                        <td class="sym">³</td>
+                                        <td>30% - 39%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">²</td>
+                                        <td>20% - 29%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">¹</td>
+                                        <td>10% - 19%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⁰</td>
+                                        <td>&lt; 10%</td>
                                     </tr>
                                 </table>
 
@@ -596,6 +608,11 @@
                                         <th colspan="3"
                                             style="border:none; padding-bottom:5px; color:#aaa; font-weight:normal;">
                                             Structural Match Strength</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">◈</td>
+                                        <td>True Neutral</td>
+                                        <td>Perfectly Balanced</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">▾</td>
@@ -609,12 +626,12 @@
                                     </tr>
                                     <tr>
                                         <td class="sym">●</td>
-                                        <td>Fair Match</td>
+                                        <td>Good Match</td>
                                         <td>Balanced Profile</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⚬</td>
-                                        <td>Fair Match</td>
+                                        <td>Good Match</td>
                                         <td>Uneven Profile</td>
                                     </tr>
                                     <tr>
@@ -666,86 +683,89 @@
         // ---------------- DATA STRUCTURE ----------------
         const QUESTIONS = [
             // --- OPENNESS (10 Items) ---
-            { id: 17, text: "I frequently read dense, difficult texts.", trait: "Openness", reverse: false },
-            { id: 18, text: "I avoid theoretical discussions.", trait: "Openness", reverse: true },
-            { id: 19, text: "I spend time visualizing abstract possibilities.", trait: "Openness", reverse: false },
-            { id: 20, text: "I struggle with purely theoretical concepts.", trait: "Openness", reverse: true },
-            { id: 21, text: "I am known for suggesting radical alternatives.", trait: "Openness", reverse: false },
-            { id: 22, text: "I prefer established data over speculation.", trait: "Openness", reverse: true },
-            { id: 23, text: "I disassemble systems to understand their core mechanics.", trait: "Openness", reverse: false },
-            { id: 24, text: "I prefer to improvise rather than follow a script.", trait: "Openness", reverse: false },
-            { id: 59, text: "I test unproven methods.", trait: "Openness", reverse: false },
-            { id: 60, text: "I build my own tools or workflows.", trait: "Openness", reverse: false },
+            // Measures: intellectual curiosity, imagination, aesthetic sensitivity, preference for novelty
+            { id: 17, text: "I enjoy discussing abstract ideas even when they have no immediate practical use.", trait: "Openness", reverse: false },
+            { id: 18, text: "I have a vivid imagination.", trait: "Openness", reverse: false },
+            { id: 19, text: "I get very absorbed in art, music, nature, or books.", trait: "Openness", reverse: false },
+            { id: 20, text: "I enjoy exploring ideas that challenge how I see the world.", trait: "Openness", reverse: true },
+            { id: 21, text: "I try new experiences just to see what they’re like.", trait: "Openness", reverse: false },
+            { id: 22, text: "I prefer sticking to what I know, rather than learning new things.", trait: "Openness", reverse: true },
+            { id: 23, text: "I enjoy experimenting with new ways of thinking or doing things.", trait: "Openness", reverse: false },
+            { id: 24, text: "I am curious about topics outside my usual interests.", trait: "Openness", reverse: false },
+            { id: 59, text: "I find it uncomfortable when ideas are complex or hard to understand.", trait: "Openness", reverse: false },
+            { id: 60, text: "I am someone who tries unconventional approaches to problems.", trait: "Openness", reverse: false },
 
             // --- CONSCIENTIOUSNESS (10 Items) ---
-            { id: 33, text: "I often complete work well ahead of schedule.", trait: "Conscientiousness", reverse: false },
-            { id: 34, text: "I leave tools or items out of place.", trait: "Conscientiousness", reverse: true },
-            { id: 35, text: "I operate on a strict timetable.", trait: "Conscientiousness", reverse: false },
-            { id: 36, text: "I live in a cluttered environment.", trait: "Conscientiousness", reverse: true },
-            { id: 37, text: "I am a perfectionist with every detail.", trait: "Conscientiousness", reverse: false },
-            { id: 38, text: "I avoid responsibilities.", trait: "Conscientiousness", reverse: true },
-            { id: 39, text: "I plan for contingencies.", trait: "Conscientiousness", reverse: false },
-            { id: 40, text: "I act without a plan.", trait: "Conscientiousness", reverse: true },
-            { id: 53, text: "I track my progress towards long-term goals.", trait: "Conscientiousness", reverse: false },
-            { id: 54, text: "I ensure the group stays on task.", trait: "Conscientiousness", reverse: false },
+            // Measures: organization, self-discipline, reliability, planning
+            { id: 33, text: "A disordered workspace makes it harder for me to focus.", trait: "Conscientiousness", reverse: false },
+            { id: 34, text: "Deadlines should be negotiable and flexible in practice rather than strict.", trait: "Conscientiousness", reverse: true },
+            { id: 35, text: "I prefer having a structured routine rather than improvising each day.", trait: "Conscientiousness", reverse: false },
+            { id: 36, text: "I don't worry much about small details when working on a long-term goal.", trait: "Conscientiousness", reverse: true },
+            { id: 37, text: "I set high standards for the quality of my work.", trait: "Conscientiousness", reverse: false },
+            { id: 38, text: "I prepare for potential setbacks in advance.", trait: "Conscientiousness", reverse: false },
+            { id: 39, text: "When I start a task, I make sure I have everything I need to finish it.", trait: "Conscientiousness", reverse: false },
+            { id: 40, text: "I complete important tasks even when I don’t feel like it.", trait: "Conscientiousness", reverse: false },
+            { id: 53, text: "I track progress whenever possible.", trait: "Conscientiousness", reverse: false },
+            { id: 54, text: "I tend to leave things unfinished.", trait: "Conscientiousness", reverse: true },
 
             // --- EXTRAVERSION (10 Items) ---
-            { id: 9, text: "I enjoy the energy of a crowd.", trait: "Extraversion", reverse: false },
-            { id: 10, text: "I avoid drawing attention to myself.", trait: "Extraversion", reverse: true },
-            { id: 11, text: "I am comfortable starting conversations.", trait: "Extraversion", reverse: false },
-            { id: 12, text: "I keep my thoughts to myself in groups.", trait: "Extraversion", reverse: true },
-            { id: 13, text: "I enjoy entertaining others.", trait: "Extraversion", reverse: false },
-            { id: 14, text: "Socializing leaves me completely exhausted.", trait: "Extraversion", reverse: true },
-            { id: 15, text: "I thrive in high-activity environments.", trait: "Extraversion", reverse: false },
-            { id: 16, text: "I cannot focus if others are nearby.", trait: "Extraversion", reverse: true },
-            { id: 61, text: "I take command in group settings.", trait: "Extraversion", reverse: false },
-            { id: 62, text: "I maintain a wide network of contacts.", trait: "Extraversion", reverse: false },
-
+            // Measures: sociability, assertiveness, positive affect, activity
+            { id: 9, text: "I need time alone to recharge after social activity.", trait: "Extraversion", reverse: true },       // revised to focus on preference
+            { id: 10, text: "I prefer to stay in the background rather than lead the discussion.", trait: "Extraversion", reverse: true },
+            { id: 12, text: "I avoid social gatherings unless I have a clear reason to attend.", trait: "Extraversion", reverse: true },
+            { id: 14, text: "I try not to draw attention to myself in groups.", trait: "Extraversion", reverse: true },
+            { id: 16, text: "I prefer calm social settings (small groups, quiet conversations) over loud parties.", trait: "Extraversion", reverse: true }, // fixes openness confound
+            { id: 11, text: "I like to keep my social schedule full and active.", trait: "Extraversion", reverse: false },
+            { id: 13, text: "Being around lively, energetic people boosts my mood.", trait: "Extraversion", reverse: false },   // adds affect
+            { id: 15, text: "I seek out invitations and opportunities to socialize.", trait: "Extraversion", reverse: false }, // rewrites 'wish' to measure approach
+            { id: 61, text: "I can easily start conversations with strangers.", trait: "Extraversion", reverse: false },
+            { id: 62, text: "I like taking the lead when a group needs direction.", trait: "Extraversion", reverse: false },      // added assertivenes
             // --- AGREEABLENESS (10 Items) ---
-            { id: 25, text: "I trust strangers until proven otherwise.", trait: "Agreeableness", reverse: false },
-            { id: 26, text: "I can be cold and distant.", trait: "Agreeableness", reverse: true },
-            { id: 27, text: "I interrupt my own workflow to help others.", trait: "Agreeableness", reverse: false },
-            { id: 28, text: "I point out the faults of others.", trait: "Agreeableness", reverse: true },
-            { id: 29, text: "I deflect praise to others.", trait: "Agreeableness", reverse: false },
-            { id: 30, text: "I view myself as superior to my peers.", trait: "Agreeableness", reverse: true },
-            { id: 31, text: "I actively campaign for universal welfare.", trait: "Agreeableness", reverse: false },
-            { id: 32, text: "I enforce rules regardless of feelings.", trait: "Agreeableness", reverse: true },
-            { id: 63, text: "I forgive debts or slights.", trait: "Agreeableness", reverse: false },
-            { id: 64, text: "I always put the group's needs before my own ambitions.", trait: "Agreeableness", reverse: false },
+            // Measures: trust, compassion, cooperation, concern for others
+            { id: 25, text: "I assume most people are trustworthy until proven otherwise.", trait: "Agreeableness", reverse: false },
+            { id: 26, text: "Being direct and forceful is often more effective than being gentle.", trait: "Agreeableness", reverse: true },
+            { id: 27, text: "If my goals conflict with the group’s, I usually choose my own.", trait: "Agreeableness", reverse: true },
+            { id: 28, text: "I try to understand other people’s feelings before judging them.", trait: "Agreeableness", reverse: false },
+            { id: 29, text: "I can be quite blunt and harsh in disputes.", trait: "Agreeableness", reverse: true },
+            { id: 30, text: "I am concerned about how my decisions affect others.", trait: "Agreeableness", reverse: false },
+            { id: 31, text: "I help strangers whenever I can.", trait: "Agreeableness", reverse: false },
+            { id: 32, text: "I rarely forgive people more than once.", trait: "Agreeableness", reverse: true },
+            { id: 63, text: "A cooperative approach often produces better long-term outcomes than purely competitive ones.", trait: "Agreeableness", reverse: false },
+            { id: 64, text: "I am willing to compromise on disagreements.", trait: "Agreeableness", reverse: false },
 
             // --- NEUROTICISM (10 Items) ---
-            { id: 1, text: "I experience physical symptoms of stress.", trait: "Neuroticism", reverse: false },
-            { id: 2, text: "I maintain composure during crises.", trait: "Neuroticism", reverse: true },
-            { id: 3, text: "I express frustration visibly.", trait: "Neuroticism", reverse: false },
-            { id: 4, text: "I maintain a consistent mood.", trait: "Neuroticism", reverse: true },
-            { id: 5, text: "My energy levels fluctuate unpredictably.", trait: "Neuroticism", reverse: false },
-            { id: 6, text: "I remain unconcerned by uncertainty.", trait: "Neuroticism", reverse: true },
-            { id: 7, text: "I suffer from physical tension.", trait: "Neuroticism", reverse: false },
-            { id: 8, text: "I adapt quickly to disruptions.", trait: "Neuroticism", reverse: true },
-            { id: 57, text: "I shut down when overloaded.", trait: "Neuroticism", reverse: false },
-            { id: 58, text: "I function effectively under high demand.", trait: "Neuroticism", reverse: true },
+            // Measures: emotional reactivity, anxiety, mood variability, vulnerability to stress
+            { id: 1, text: "I notice stress signals in my body a lot.", trait: "Neuroticism", reverse: false },
+            { id: 2, text: "I take criticism more personally than I’d like to.", trait: "Neuroticism", reverse: true },
+            { id: 3, text: "I can't help but dwell on my mistakes.", trait: "Neuroticism", reverse: false },
+            { id: 4, text: "I feel tense or on edge more often than others seem to.", trait: "Neuroticism", reverse: true },
+            { id: 5, text: "I remain calm even in stressful situations.", trait: "Neuroticism", reverse: false },
+            { id: 6, text: "Worrying about my problems won't help me solve them, so I don't worry much about them.", trait: "Neuroticism", reverse: true },
+            { id: 7, text: "The unpredictable nature of the world makes me uneasy.", trait: "Neuroticism", reverse: false },
+            { id: 8, text: "I bounce back quickly after setbacks.", trait: "Neuroticism", reverse: true },
+            { id: 57, text: "I sometimes overthink situations long after they are over.", trait: "Neuroticism", reverse: false },
+            { id: 58, text: "I rarely panic in stressful situations.", trait: "Neuroticism", reverse: true },
 
             // --- DARK TRIAD (12 Items) ---
-            // REVISED: Framed as "Rational/Pragmatic" to bypass ego defense mechanisms.
+            // Measures: Machiavellianism (41-44), Psychopathy (45-48), Narcissism (49-52)
 
-            // Machiavellianism: Reframed as "Strategic Realism" and "Information Control."
-            { id: 41, text: "Complete transparency is a strategic error in most negotiations.", trait: "Machiavellianism", reverse: false },
-            { id: 42, text: "To achieve significant goals, one must often tell people what they wish to hear.", trait: "Machiavellianism", reverse: false },
-            { id: 43, text: "It is safer to assume people have hidden agendas than to trust them blindly.", trait: "Machiavellianism", reverse: false },
-            { id: 44, text: "The outcome of a project is more important than the methods used to achieve it.", trait: "Machiavellianism", reverse: false },
-
-            // Psychopathy: Focus on detachment, lack of sentiment, and risk-taking.
-            { id: 45, text: "Sentimental morality often hinders necessary action.", trait: "Psychopathy", reverse: false },
-            { id: 46, text: "Rules are useful guidelines for the masses, but flexible for the exceptional.", trait: "Psychopathy", reverse: false },
-            { id: 47, text: "I rarely dwell on past mistakes; regret is a wasted emotion.", trait: "Psychopathy", reverse: false },
-            { id: 48, text: "I can make difficult decisions without being clouded by empathy.", trait: "Psychopathy", reverse: false },
-
-            // Narcissism: Focus on superiority, vision, and frustration with mediocrity.
-            { id: 49, text: "I often feel surrounded by incompetence.", trait: "Narcissism", reverse: false },
-            { id: 50, text: "My natural talents grant me the right to lead others.", trait: "Narcissism", reverse: false },
-            { id: 51, text: "Society would function better if more people listened to my ideas.", trait: "Narcissism", reverse: false },
-            { id: 52, text: "I require significant recognition to feel my efforts are valued.", trait: "Narcissism", reverse: false }
+            // Machiavellianism: strategic manipulation, instrumental honesty
+            { id: 41, text: "It’s smart to keep your true intentions hidden.", trait: "Machiavellianism", reverse: false },
+            { id: 42, text: "I would prefer to be respected rather than liked in a leadership role.", trait: "Machiavellianism", reverse: false },
+            { id: 43, text: "People’s public morals are often a performance.", trait: "Machiavellianism", reverse: false },
+            { id: 44, text: "In negotiations, I prefer approaches that maximize outcome even if they seem cold.", trait: "Machiavellianism", reverse: false },
+            // Psychopathy: low empathy, impulsivity, risk-taking
+            { id: 45, text: "I seldom feel guilty after upsetting someone.", trait: "Psychopathy", reverse: false },
+            { id: 46, text: "I generally follow social rules even when they are inconvenient.", trait: "Psychopathy", reverse: true },
+            { id: 47, text: "I take risks that others would describe as reckless when the reward seems worth it.", trait: "Psychopathy", reverse: false },
+            { id: 48, text: "The suffering of others rarely influences my decisions.", trait: "Psychopathy", reverse: false },
+            // Narcissism: grandiosity, entitlement, need for admiration
+            { id: 49, text: "I see myself as more capable than most people I know.", trait: "Narcissism", reverse: false },
+            { id: 50, text: "I prefer leadership roles because I think I perform better than most followers.", trait: "Narcissism", reverse: false },
+            { id: 51, text: "Recognition for my achievements is important to my sense of self-worth.", trait: "Narcissism", reverse: false },
+            { id: 52, text: "I usually expect special treatment when I deserve it.", trait: "Narcissism", reverse: false }
         ];
+
 
         // ---------------- LOGIC ----------------
         let currentQIndex = 0;
@@ -820,45 +840,67 @@
 
         // ---------------- ADVANCED METRICS ----------------
         function getTraitSymbol(score) {
-            // HIGH END
-            if (score >= 80) return "×";  // Exceptionally High
-            if (score >= 60) return "⁺";  // Very High
-            if (score >= 54) return "˖";  // Borderline High
+            // Superscript Deciles: 0-9
+            const superscripts = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
 
-            // CENTER
-            if (score >= 46) return "￮";  // Balanced
+            // Constrain 0-100 to index 0-9
+            // Math.floor(score / 10) gives 0-10.
+            // But 100 needs special handling if we want it to be 9, or maybe a 10th bin?
+            // "⁹ = 90 - 100". So let's clamp max index to 9.
+            let idx = Math.floor(score / 10);
+            if (idx > 9) idx = 9;
+            if (idx < 0) idx = 0;
 
-            // LOW END
-            if (score >= 40) return "⎻";  // Borderline Low
-            if (score >= 20) return "⎺";  // Very Low
-            return "⎽";                   // Exceptionally Low
+            return superscripts[idx];
         }
 
         function calculateStructure(normalized) {
             const traits = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"];
+
+            // 1. Calculate Deviations
             const deviations = traits.map(t => Math.abs(normalized[t] - 50));
 
-            // SSI: Average deviation
-            const ssi = deviations.reduce((a, b) => a + b, 0) / deviations.length;
+            // 2. Sort Deviations (Highest to Lowest)
+            const sortedDevs = [...deviations].sort((a, b) => b - a);
 
-            // PSI: Standard Deviation of deviations
-            const meanDev = ssi;
-            const variance = deviations.reduce((a, b) => a + Math.pow(b - meanDev, 2), 0) / deviations.length;
+            // 3. Calculate "Cardinal Strength" (Average of the Top 3 only)
+            // This prevents neutral traits from dragging down the score of spiky profiles.
+            const cardinalStrength = (sortedDevs[0] + sortedDevs[1] + sortedDevs[2]) / 3;
+
+            // 4. Calculate Consistency (PSI) - Standard Deviation of all 5
+            // We still use all 5 here because we want to know if the profile is "Lopsided" (High PSI) or "Even" (Low PSI)
+            const meanDev = deviations.reduce((a, b) => a + b, 0) / 5;
+            const variance = deviations.reduce((a, b) => a + Math.pow(b - meanDev, 2), 0) / 5;
             const psi = Math.sqrt(variance);
 
+            // --- LOGIC GATES ---
+
+            // True Neutral: If your *strongest* traits are still weak.
+            if (cardinalStrength < 12 && psi < 8) {
+                return "◈"; // True Neutral
+            }
+
+            // Strength Thresholds (Adjusted for Top 3 logic)
+            // > 24: Strong (Avg score of top 3 is >74 or <26)
+            // > 14: Good   (Avg score of top 3 is >64 or <36)
+            // < 14: Weak   (Messy profile)
             let strength = "";
-            if (ssi >= 25) strength = "Strong";
-            else if (ssi >= 15) strength = "Fair";
+            if (cardinalStrength >= 24) strength = "Strong";
+            else if (cardinalStrength >= 14) strength = "Fair";
             else strength = "Weak";
 
+            // Symmetry Threshold
+            // High PSI (>10) means you are "Spiky" (Some high, some low)
+            // Low PSI (<10) means you are "Flat" (All scores roughly same distance from center)
             let symmetry = (psi < 10) ? "Even" : "Odd";
 
-            if (strength === "Strong" && symmetry === "Even") return "▾";
-            if (strength === "Strong" && symmetry === "Odd") return "▿";
-            if (strength === "Fair" && symmetry === "Even") return "●";
-            if (strength === "Fair" && symmetry === "Odd") return "⚬";
-            if (strength === "Weak" && symmetry === "Even") return "￭";
-            return "⌑";
+            // Return Symbol
+            if (strength === "Strong" && symmetry === "Even") return "▾"; // Strong Balanced
+            if (strength === "Strong" && symmetry === "Odd") return "▿";  // Strong Spiky
+            if (strength === "Fair" && symmetry === "Even") return "●";   // Good Balanced
+            if (strength === "Fair" && symmetry === "Odd") return "⚬";    // Good Spiky
+            if (strength === "Weak" && symmetry === "Even") return "￭";   // Weak Balanced
+            return "⌑"; // Weak Spiky
         }
 
         // SLOAN Definitions
@@ -892,6 +934,11 @@
             const mapTrait = (traitName, highChar, lowChar) => {
                 const val = normalized[traitName];
                 const sym = getTraitSymbol(val);
+
+                let idx = Math.floor(val / 10);
+                if (idx > 9) idx = 9;
+                if (idx < 0) idx = 0;
+
                 let char = "";
 
                 if (val >= 50) {
@@ -907,11 +954,25 @@
 
                 // Build Breakdown HTML
                 const def = sloanDefs[char];
-                let description = def.desc;
+                let description = "";
 
-                // Override for Balanced Scores
-                if (sym === "￮") {
+                // Intensity Logic
+                // 0-3 (0-39%): Very Low
+                // 4 (40-49%): Slightly Low
+                // 5 (50-59%): Balanced
+                // 6 (60-69%): Slightly High
+                // 7-9 (70-100%): Very High
+
+                if (idx <= 3) {
+                    description = `Very ${def.name}`;
+                } else if (idx === 4) {
+                    description = `Slightly ${def.name}`;
+                } else if (idx === 5) {
                     description = `Balanced ${traitName}`;
+                } else if (idx === 6) {
+                    description = `Slightly ${def.name}`;
+                } else {
+                    description = `Very ${def.name}`;
                 }
 
                 userBreakdownHTML += `
@@ -1063,23 +1124,24 @@
         function redirectToForm() {
             const scores = calculateScores().normalized;
 
-            // Google Form Entry IDs
+            // Updated Google Form Entry IDs for the new form
             const entryIDs = {
-                "Narcissism": "1132147578",
-                "Machiavellianism": "585559511",
-                "Psychopathy": "1176101371",
-                "Openness": "1188908959",
-                "Conscientiousness": "1957203118",
-                "Extraversion": "516165326",
-                "Agreeableness": "672976918",
-                "Neuroticism": "1986475625"
+                "Openness": "402402723",
+                "Conscientiousness": "838876990",
+                "Extraversion": "1893620745", // Form uses "Extroversion Score"
+                "Agreeableness": "58068965",
+                "Neuroticism": "1629665739", // Form uses "Neurotic Score "
+                "Machiavellianism": "861532553",
+                "Narcissism": "561194856",
+                "Psychopathy": "1829528666"
             };
 
-            const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeOcyyRUkr3m0SHtZqIfsjkx3I0bUtlOf6UHcoA_Evl8_FGzA/viewform?usp=pp_url";
+            const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSflZH458ErTYrYEgi5fydaHFw6AydMiRebzE7jBoShxRWgMig/viewform?usp=pp_url";
 
             let params = "";
             for (const [trait, id] of Object.entries(entryIDs)) {
-                const val = Math.round(scores[trait]);
+
+                const val = Math.round(scores[trait] || 0);
                 params += `&entry.${id}=${val}`;
             }
 
