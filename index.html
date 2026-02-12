@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big 5 Norming.</title>
+    <title>Metric Assessment Unit v2.5</title>
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -552,10 +552,12 @@
                                 <p>Reference Key</p>
 
                                 <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; line-height: 1.4;">
-                                    <strong>Intensity Modifiers</strong> indicate how far your score deviates from the
-                                    average.<br><br>
-                                    <strong>Structural Match</strong> (the final symbol) indicates how strongly your
-                                    overall profile aligns with this archetype.
+                                    <strong>Intensity Modifiers</strong> denote the magnitude of each individual trait
+                                    relative to the baseline.<br><br>
+                                    <strong>Structural Match</strong> (the final symbol) analyzes the
+                                    <strong>definition</strong> and <strong>symmetry</strong> of your profile. It
+                                    indicates whether your archetype is driven by uniform traits (Balanced) or specific
+                                    dominant spikes (Asymmetric).
                                 </div>
 
                                 <!-- Decile Table -->
@@ -646,11 +648,17 @@
                                     </tr>
                                 </table>
                             </div>
+
+
                         </div>
                     </div>
 
                     <div class="archetype-summary" id="archetype-summary"></div>
                 </div>
+
+                <button class="continue-btn" onclick="redirectToForm()">
+                    [ CONTINUE TO FORM ]
+                </button>
 
                 <!-- Data Grid -->
                 <div class="data-grid">
@@ -672,9 +680,7 @@
                     </div>
                 </div>
 
-                <button class="continue-btn" onclick="redirectToForm()">
-                    [ CONTINUE TO FORM ] <span>&rarr;</span>
-                </button>
+
             </div>
         </div>
     </div>
@@ -940,8 +946,12 @@
                 if (idx < 0) idx = 0;
 
                 let char = "";
+                let isPerfectBalance = false;
 
-                if (val >= 50) {
+                if (Math.round(val) === 50) {
+                    char = "x";
+                    isPerfectBalance = true;
+                } else if (val > 50) {
                     char = highChar;
                     traits[highChar] = true;
                 } else {
@@ -953,31 +963,38 @@
                 complexCode += char + sym;
 
                 // Build Breakdown HTML
-                const def = sloanDefs[char];
                 let description = "";
+                let name = "";
 
-                // Intensity Logic
-                // 0-3 (0-39%): Very Low
-                // 4 (40-49%): Slightly Low
-                // 5 (50-59%): Balanced
-                // 6 (60-69%): Slightly High
-                // 7-9 (70-100%): Very High
-
-                if (idx <= 3) {
-                    description = `Very ${def.name}`;
-                } else if (idx === 4) {
-                    description = `Slightly ${def.name}`;
-                } else if (idx === 5) {
-                    description = `Balanced ${traitName}`;
-                } else if (idx === 6) {
-                    description = `Slightly ${def.name}`;
+                if (isPerfectBalance) {
+                    name = "Balanced";
+                    description = `Perfectly Balanced ${traitName}`;
                 } else {
-                    description = `Very ${def.name}`;
+                    // Fallback for non-perfect scores
+                    const def = sloanDefs[char];
+                    name = def.name;
+
+                    if (idx <= 3) {
+                        description = `Very ${def.name}`;
+                    } else if (idx === 4) {
+                        description = `Slightly ${def.name}`;
+                    } else if (idx === 5) {
+                        // 50-59 range but not exactly 50 (or rounded to 50 but logic captured it?)
+                        // Actually getTraitSymbol(50) -> ⁵. 
+                        // If it enters here, it means val != 50 (due to rounding check above).
+                        // Note: Math.round(50.1) is 50. So 50.1 triggers "x". 
+                        // But 52 triggers this block (idx 5).
+                        description = `Balanced ${traitName}`;
+                    } else if (idx === 6) {
+                        description = `Slightly ${def.name}`;
+                    } else {
+                        description = `Very ${def.name}`;
+                    }
                 }
 
                 userBreakdownHTML += `
                     <li>
-                        <span class="ub-letter">${char}${sym} &nbsp; ${def.name}</span>
+                        <span class="ub-letter">${char}${sym} &nbsp; ${name}</span>
                         <span class="ub-desc">${description}</span>
                     </li>
                 `;
@@ -998,7 +1015,7 @@
             document.getElementById('complex-code-display').innerText = complexCode + structSymbol;
 
             document.getElementById('user-breakdown').innerHTML = userBreakdownHTML;
-            document.getElementById('archetype-summary').innerText = generateDescription(traits);
+            document.getElementById('archetype-summary').innerHTML = generateDescription(normalized);
 
             // Wait for layout to settle before drawing canvas
             setTimeout(() => {
@@ -1015,18 +1032,82 @@
             document.getElementById('dt-scores').innerHTML = dtHTML;
         }
 
-        function generateDescription(t) {
-            let desc = "Analysis of your responses indicates a specific behavioral configuration. ";
-            if (t.S) desc += "You expend significant energy in social environments and prefer collective action. ";
-            else desc += "You conserve energy by avoiding large groups, preferring solitary labor. ";
-            if (t.L) desc += "You are highly reactive to stress and environmental instability. ";
-            else desc += "You maintain a stable equilibrium and are resistant to external pressure. ";
-            if (t.I) desc += "Cognitively, you prioritize theoretical concepts and novelty over tradition. ";
-            else desc += "Cognitively, you prioritize established methods and concrete utility over abstraction. ";
-            if (t.A) desc += "You maintain a cooperative stance, prioritizing group cohesion over personal gain. ";
-            else desc += "You maintain a competitive stance, prioritizing your own leverage over the group. ";
-            if (t.O) desc += "Finally, you enforce strict discipline and planning in your workflow.";
-            else desc += "Finally, you utilize a flexible, spontaneous approach to task completion.";
+        // ---------------- TEXT GENERATION ENGINE ----------------
+
+        const traitText = {
+            "Extraversion": {
+                high: "a drive for external stimulus and social engagement",
+                low: "a distinct preference for solitary processing and environmental shielding",
+                mid: "a flexible social battery that adapts to context"
+            },
+            "Neuroticism": {
+                high: "heightened sensitivity to environmental instability and threat detection",
+                low: "robust emotional equilibrium and resistance to stress",
+                mid: "generally stable emotional regulation with situational reactivity"
+            },
+            "Conscientiousness": {
+                high: "a rigorous adherence to structure, planning, and efficiency",
+                low: "a preference for spontaneity and flexible improvisation over rigid planning",
+                mid: "a balanced workflow that alternates between structure and adaptability"
+            },
+            "Agreeableness": {
+                high: "a cooperative instinct that prioritizes group cohesion",
+                low: "a competitive, skeptical stance focused on leverage and outcome",
+                mid: "a transactional approach to cooperation based on mutual benefit"
+            },
+            "Openness": {
+                high: "a cognitive framework prioritizing novelty, abstraction, and theory",
+                low: "a pragmatic focus on established methods, concrete data, and utility",
+                mid: "a balance between theoretical curiosity and practical application"
+            }
+        };
+
+        function generateDescription(scores) {
+            // 1. Calculate deviations to find the "Driver" traits
+            const traits = Object.keys(scores).filter(k => k !== "Machiavellianism" && k !== "Narcissism" && k !== "Psychopathy");
+
+            const ranked = traits.map(t => {
+                const val = scores[t];
+                const dev = Math.abs(val - 50);
+                let intensity = "mid";
+                if (val >= 65) intensity = "high";
+                else if (val <= 35) intensity = "low";
+
+                // "Extreme" flag for very high deviations
+                const isExtreme = dev >= 25;
+
+                return { trait: t, val, dev, intensity, isExtreme };
+            }).sort((a, b) => b.dev - a.dev); // Sort highest deviation first
+
+            // 2. Construct the Narrative
+            let desc = "";
+
+            // --- PART A: The Primary Driver (The #1 most distinct trait) ---
+            const primary = ranked[0];
+            desc += `Your behavioral architecture is primarily defined by <strong>${traitText[primary.trait][primary.intensity]}</strong>. `;
+
+            // --- PART B: The Supporting Structure (Traits 2 and 3) ---
+            // We combine these to show how they interact with the primary.
+            const secondary = ranked[1];
+            const tertiary = ranked[2];
+
+            desc += `This configuration is reinforced by ${traitText[secondary.trait][secondary.intensity]}, `;
+            desc += `while maintaining ${traitText[tertiary.trait][tertiary.intensity]}. `;
+
+            // --- PART C: The Stabilizers (The Neutral/Lowest Deviation traits) ---
+            // If the bottom traits are actually neutral (dev < 15), we frame them as "Stabilizers".
+            // If they are still spiky (just less spiky than the top), we frame them as "Additional factors".
+            const bottom = ranked.slice(3);
+            const neutrals = bottom.filter(x => x.dev < 20); // slightly relaxed from 15
+
+            if (neutrals.length > 0) {
+                const names = neutrals.map(x => x.trait).join(" and ");
+                desc += `Notably, your scores in ${names} indicate a <strong>stabilizing versatility</strong>, allowing you to adapt your approach in these areas depending on the specific demands of the situation.`;
+            } else {
+                // If even the bottom traits are extreme (a very intense personality)
+                desc += `Finally, the profile is completed by ${traitText[bottom[0].trait][bottom[0].intensity]}.`;
+            }
+
             return desc;
         }
 
@@ -1264,4 +1345,3 @@
 </body>
 
 </html>
-
