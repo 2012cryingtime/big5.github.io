@@ -580,7 +580,23 @@
                                     </tr>
                                     <tr>
                                         <td class="sym">⁵</td>
-                                        <td>Balanced / Low Intensity</td>
+                                        <td>Low-Moderate Intensity</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⁴</td>
+                                        <td>Low Intensity</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">³</td>
+                                        <td>Very Low Intensity</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">²</td>
+                                        <td>Minimal Intensity</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">¹</td>
+                                        <td>Balanced / Neutral</td>
                                     </tr>
                                 </table>
 
@@ -921,7 +937,7 @@
                 const val = normalized[traitName];
 
                 // --- MODIFICATION START ---
-                // We calculate "Intensity" for the symbol. 
+                // We calculate "Intensity" 
                 // If the value is below 50, we invert it relative to 100 
                 // so that a 10 becomes a 90 (High Intensity of the Low Trait).
                 let intensityVal = val;
@@ -929,7 +945,15 @@
                     intensityVal = 100 - val;
                 }
 
-                const sym = getTraitSymbol(intensityVal);
+                // Map Intensity (50-100) to Scale (1-9)
+                // 50 -> 1 (Balanced)
+                // 100 -> 9 (Extreme)
+                // Formula: (intensityVal - 50) / 50 * 8 + 1
+                const scaleIdx = Math.floor(((intensityVal - 50) / 50) * 8) + 1;
+                const superscripts = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
+                // Clamp to be safe
+                const safeIdx = Math.max(1, Math.min(9, scaleIdx));
+                const sym = superscripts[safeIdx];
                 // --- MODIFICATION END ---
 
                 let idx = Math.floor(val / 10);
@@ -965,19 +989,14 @@
                     const def = sloanDefs[char];
                     name = def.name;
 
-                    // We must also update the text logic to match the new intensity paradigm
-                    // or simply rely on the raw index (idx) which is still absolute (0-10).
-                    // The original logic for text description works fine with absolute index,
-                    // but let's ensure the adjectives match the new symbol logic.
-
-                    // If idx is 0, 1, 2 (Low score) -> Very [LowTrait]
-                    // If idx is 7, 8, 9 (High score) -> Very [HighTrait]
-
-                    if (idx <= 2 || idx >= 7) {
+                    // Text descriptions for 1-9 intensity scale
+                    if (safeIdx >= 8) { // 8, 9
+                        description = `Extreme ${def.name}`;
+                    } else if (safeIdx >= 6) { // 6, 7
                         description = `Very ${def.name}`;
-                    } else if (idx === 3 || idx === 6) {
+                    } else if (safeIdx >= 4) { // 4, 5
                         description = `Moderately ${def.name}`;
-                    } else {
+                    } else { // 1, 2, 3
                         description = `Slightly ${def.name}`;
                     }
                 }
