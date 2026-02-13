@@ -552,40 +552,40 @@
                                 <p>Reference Key</p>
 
                                 <div style="font-size: 0.7rem; color: #888; margin-bottom: 10px; line-height: 1.4;">
-                                    <strong>Intensity Modifiers</strong> denote the magnitude of each individual trait
-                                    relative to the baseline.<br><br>
+                                    <strong>Intensity Modifiers</strong> denote how far each trait deviates from
+                                    neutral (50). The letter indicates direction; the number indicates strength.<br><br>
                                     <strong>Structural Match</strong> (the final symbol) analyzes the
                                     <strong>definition</strong> and <strong>symmetry</strong> of your profile. It
                                     indicates whether your archetype is driven by uniform traits (Balanced) or specific
                                     dominant spikes (Asymmetric).
                                 </div>
 
-                                <!-- Intensity Table -->
+                                <!-- Intensity Table (Distance from 50) -->
                                 <table class="legend-table">
                                     <tr>
-                                        <th colspan="2"
-                                            style="border:none; padding-bottom:5px; color:#aaa; font-weight:normal;">
-                                            Intensity (|score − 50|)</th>
+                                        <td class="sym">⁹ ⁸</td>
+                                        <td>[Extremely]</td>
+                                        <td>40–50 from neutral</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⁸ - ⁹</td>
-                                        <td>Extremely</td>
+                                        <td class="sym">⁷ ⁶</td>
+                                        <td>[Very]</td>
+                                        <td>30–39 from neutral</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⁶ - ⁷</td>
-                                        <td>Very</td>
+                                        <td class="sym">⁵ ⁴</td>
+                                        <td>[Moderately]</td>
+                                        <td>20–29 from neutral</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">⁴ - ⁵</td>
-                                        <td>Moderately</td>
+                                        <td class="sym">³ ²</td>
+                                        <td>[Vaguely]</td>
+                                        <td>10–19 from neutral</td>
                                     </tr>
                                     <tr>
-                                        <td class="sym">² - ³</td>
-                                        <td>Vaguely</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="sym">⁰ - ¹</td>
-                                        <td>Ambiguously</td>
+                                        <td class="sym">¹ ⁰</td>
+                                        <td>[Neutral / Balanced]</td>
+                                        <td>0–9 from neutral</td>
                                     </tr>
                                 </table>
 
@@ -831,19 +831,20 @@
 
         // ---------------- ADVANCED METRICS ----------------
         function getTraitSymbol(score) {
-            // Superscript based on distance from 50 (Neutral)
+            // Superscript Intensity: 0-9 based on distance from neutral (50)
+            // Direction is handled by the letter (O/U, S/R, etc.)
+            // Number always means strength/extremity
             const superscripts = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
 
-            const dist = Math.abs(score - 50);
-
-            // Map 0-50 distance to 0-9 index
-            // 0-4   -> 0 
-            // 5-9   -> 1
-            // ...
-            // 45-50 -> 9
-
-            let idx = Math.floor(dist / 5);
+            // Distance from neutral (0-50) mapped to index 0-9
+            // Each bucket spans 5 points of distance:
+            //   ⁰ = 0-4, ¹ = 5-9, ² = 10-14, ³ = 15-19,
+            //   ⁴ = 20-24, ⁵ = 25-29, ⁶ = 30-34, ⁷ = 35-39,
+            //   ⁸ = 40-44, ⁹ = 45-50
+            const distance = Math.abs(score - 50);
+            let idx = Math.floor(distance / 5);
             if (idx > 9) idx = 9;
+            if (idx < 0) idx = 0;
 
             return superscripts[idx];
         }
@@ -929,14 +930,19 @@
                 const val = normalized[traitName];
                 const sym = getTraitSymbol(val);
 
-                // Calculate Distance Level (0-9)
-                const dist = Math.abs(val - 50);
-                let idx = Math.floor(dist / 5);
+                // Intensity index based on distance from 50
+                const distance = Math.abs(val - 50);
+                let idx = Math.floor(distance / 5);
                 if (idx > 9) idx = 9;
+                if (idx < 0) idx = 0;
 
                 let char = "";
+                let isPerfectBalance = false;
 
-                if (val >= 50) {
+                if (Math.round(val) === 50) {
+                    char = "x";
+                    isPerfectBalance = true;
+                } else if (val > 50) {
                     char = highChar;
                     traits[highChar] = true;
                 } else {
@@ -944,46 +950,36 @@
                     traits[lowChar] = true;
                 }
 
-                // EXACT 50 Handling
-                if (Math.round(val) === 50) {
-                    char = "x";
-                }
-
                 simpleCode += char;
                 complexCode += char + sym;
 
                 // Build Breakdown HTML
+                // Bracket labels based on intensity pairs:
+                //   0-1 = Neutral / Balanced
+                //   2-3 = Vaguely
+                //   4-5 = Moderately
+                //   6-7 = Very
+                //   8-9 = Extremely
                 let description = "";
                 let name = "";
 
-                if (char === "x") {
+                if (isPerfectBalance) {
                     name = "Balanced";
                     description = `Perfectly Balanced ${traitName}`;
                 } else {
                     const def = sloanDefs[char];
                     name = def.name;
 
-                    // New Intensity Descriptions (Grouped)
-                    // 0-1: Ambiguously
-                    // 2-3: Vaguely
-                    // 4-5: Moderately
-                    // 6-7: Very
-                    // 8-9: Extremely
-
-                    let intensityStr = "";
-                    if (idx <= 1) intensityStr = "Ambiguously";
-                    else if (idx <= 3) intensityStr = "Vaguely";
-                    else if (idx <= 5) intensityStr = "Moderately";
-                    else if (idx <= 7) intensityStr = "Very";
-                    else intensityStr = "Extremely";
-
                     if (idx <= 1) {
-                        // Ambiguously Social or Reserved
-                        const highName = sloanDefs[highChar].name;
-                        const lowName = sloanDefs[lowChar].name;
-                        description = `${intensityStr} ${highName} or ${lowName}`;
+                        description = `Balanced ${traitName}`;
+                    } else if (idx <= 3) {
+                        description = `Vaguely ${def.name}`;
+                    } else if (idx <= 5) {
+                        description = `Moderately ${def.name}`;
+                    } else if (idx <= 7) {
+                        description = `Very ${def.name}`;
                     } else {
-                        description = `${intensityStr} ${def.name}`;
+                        description = `Extremely ${def.name}`;
                     }
                 }
 
@@ -1010,7 +1006,7 @@
             document.getElementById('complex-code-display').innerText = complexCode + structSymbol;
 
             document.getElementById('user-breakdown').innerHTML = userBreakdownHTML;
-            document.getElementById('archetype-summary').innerText = generateDescription(traits);
+            document.getElementById('archetype-summary').innerHTML = generateDescription(normalized);
 
             // Wait for layout to settle before drawing canvas
             setTimeout(() => {
@@ -1027,18 +1023,82 @@
             document.getElementById('dt-scores').innerHTML = dtHTML;
         }
 
-        function generateDescription(t) {
-            let desc = "Analysis of your responses indicates a specific behavioral configuration. ";
-            if (t.S) desc += "You expend significant energy in social environments and prefer collective action. ";
-            else desc += "You conserve energy by avoiding large groups, preferring solitary labor. ";
-            if (t.L) desc += "You are highly reactive to stress and environmental instability. ";
-            else desc += "You maintain a stable equilibrium and are resistant to external pressure. ";
-            if (t.I) desc += "Cognitively, you prioritize theoretical concepts and novelty over tradition. ";
-            else desc += "Cognitively, you prioritize established methods and concrete utility over abstraction. ";
-            if (t.A) desc += "You maintain a cooperative stance, prioritizing group cohesion over personal gain. ";
-            else desc += "You maintain a competitive stance, prioritizing your own leverage over the group. ";
-            if (t.O) desc += "Finally, you enforce strict discipline and planning in your workflow.";
-            else desc += "Finally, you utilize a flexible, spontaneous approach to task completion.";
+        // ---------------- TEXT GENERATION ENGINE ----------------
+
+        const traitText = {
+            "Extraversion": {
+                high: "a drive for external stimulus and social engagement",
+                low: "a distinct preference for solitary processing and environmental shielding",
+                mid: "a flexible social battery that adapts to context"
+            },
+            "Neuroticism": {
+                high: "heightened sensitivity to environmental instability and threat detection",
+                low: "robust emotional equilibrium and resistance to stress",
+                mid: "generally stable emotional regulation with situational reactivity"
+            },
+            "Conscientiousness": {
+                high: "a rigorous adherence to structure, planning, and efficiency",
+                low: "a preference for spontaneity and flexible improvisation over rigid planning",
+                mid: "a balanced workflow that alternates between structure and adaptability"
+            },
+            "Agreeableness": {
+                high: "a cooperative instinct that prioritizes group cohesion",
+                low: "a competitive, skeptical stance focused on leverage and outcome",
+                mid: "a transactional approach to cooperation based on mutual benefit"
+            },
+            "Openness": {
+                high: "a cognitive framework prioritizing novelty, abstraction, and theory",
+                low: "a pragmatic focus on established methods, concrete data, and utility",
+                mid: "a balance between theoretical curiosity and practical application"
+            }
+        };
+
+        function generateDescription(scores) {
+            // 1. Calculate deviations to find the "Driver" traits
+            const traits = Object.keys(scores).filter(k => k !== "Machiavellianism" && k !== "Narcissism" && k !== "Psychopathy");
+
+            const ranked = traits.map(t => {
+                const val = scores[t];
+                const dev = Math.abs(val - 50);
+                let intensity = "mid";
+                if (val >= 65) intensity = "high";
+                else if (val <= 35) intensity = "low";
+
+                // "Extreme" flag for very high deviations
+                const isExtreme = dev >= 25;
+
+                return { trait: t, val, dev, intensity, isExtreme };
+            }).sort((a, b) => b.dev - a.dev); // Sort highest deviation first
+
+            // 2. Construct the Narrative
+            let desc = "";
+
+            // --- PART A: The Primary Driver (The #1 most distinct trait) ---
+            const primary = ranked[0];
+            desc += `Your behavioral architecture is primarily defined by <strong>${traitText[primary.trait][primary.intensity]}</strong>. `;
+
+            // --- PART B: The Supporting Structure (Traits 2 and 3) ---
+            // We combine these to show how they interact with the primary.
+            const secondary = ranked[1];
+            const tertiary = ranked[2];
+
+            desc += `This configuration is reinforced by ${traitText[secondary.trait][secondary.intensity]}, `;
+            desc += `while maintaining ${traitText[tertiary.trait][tertiary.intensity]}. `;
+
+            // --- PART C: The Stabilizers (The Neutral/Lowest Deviation traits) ---
+            // If the bottom traits are actually neutral (dev < 15), we frame them as "Stabilizers".
+            // If they are still spiky (just less spiky than the top), we frame them as "Additional factors".
+            const bottom = ranked.slice(3);
+            const neutrals = bottom.filter(x => x.dev < 20); // slightly relaxed from 15
+
+            if (neutrals.length > 0) {
+                const names = neutrals.map(x => x.trait).join(" and ");
+                desc += `Notably, your scores in ${names} indicate a <strong>stabilizing versatility</strong>, allowing you to adapt your approach in these areas depending on the specific demands of the situation.`;
+            } else {
+                // If even the bottom traits are extreme (a very intense personality)
+                desc += `Finally, the profile is completed by ${traitText[bottom[0].trait][bottom[0].intensity]}.`;
+            }
+
             return desc;
         }
 
@@ -1169,96 +1229,109 @@
             const rect = container.getBoundingClientRect();
 
             canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.height = rect.width * dpr; // Square aspect ratio
 
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
 
             const width = rect.width;
-            const height = rect.height;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const radius = (Math.min(width, height) / 2) - 30; // Margin
+            const height = rect.width;
+            const cx = width / 2;
+            const cy = height / 2;
+            const r = (width / 2) - 30; // Padding
 
-            // Order for Pentagon: N - O - C - E - A ? 
-            // Standard order often O-C-E-A-N. Let's arrange nicely.
-            const axes = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"];
-            const angleStep = (Math.PI * 2) / 5;
-            const startAngle = -Math.PI / 2; // Start top center
-
-            // Clear
             ctx.clearRect(0, 0, width, height);
 
-            // Draw Background Levels (20%, 40%, 60%, 80%, 100%)
+            // Axes
+            const axes = [
+                { label: "O", angle: -Math.PI / 2, val: normalizedScores["Openness"], color: "#38bdf8" },
+                { label: "C", angle: -Math.PI / 2 + (2 * Math.PI / 5), val: normalizedScores["Conscientiousness"], color: "#fbbf24" },
+                { label: "E", angle: -Math.PI / 2 + 2 * (2 * Math.PI / 5), val: normalizedScores["Extraversion"], color: "#f87171" },
+                { label: "A", angle: -Math.PI / 2 + 3 * (2 * Math.PI / 5), val: normalizedScores["Agreeableness"], color: "#4ade80" },
+                { label: "N", angle: -Math.PI / 2 + 4 * (2 * Math.PI / 5), val: normalizedScores["Neuroticism"], color: "#a78bfa" }
+            ];
+
+            // Grid
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 1;
-
-            for (let level = 0.2; level <= 1.0; level += 0.2) {
+            [0.2, 0.4, 0.6, 0.8, 1].forEach(scale => {
                 ctx.beginPath();
-                for (let i = 0; i < 5; i++) {
-                    const angle = startAngle + (i * angleStep);
-                    const r = radius * level;
-                    const x = centerX + Math.cos(angle) * r;
-                    const y = centerY + Math.sin(angle) * r;
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
+                axes.forEach((axis, i) => {
+                    const x = cx + Math.cos(axis.angle) * r * scale;
+                    const y = cy + Math.sin(axis.angle) * r * scale;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                });
                 ctx.closePath();
                 ctx.stroke();
-            }
+            });
 
-            // Draw Axes lines
+            // Data Shape
             ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const angle = startAngle + (i * angleStep);
-                const x = centerX + Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius;
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(x, y);
-
-                // Labels
-                const labelDist = radius + 15;
-                const lx = centerX + Math.cos(angle) * labelDist;
-                const ly = centerY + Math.sin(angle) * labelDist;
-
-                ctx.fillStyle = '#888';
-                ctx.font = '10px "Inter"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                // Shorten labels
-                const label = axes[i].substring(0, 4).toUpperCase();
-                ctx.fillText(label, lx, ly);
-            }
-            ctx.stroke();
-
-            // Draw User Shape
-            ctx.beginPath();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
-
-            for (let i = 0; i < 5; i++) {
-                const trait = axes[i];
-                const score = normalizedScores[trait] || 0;
-                const r = radius * (score / 100);
-                const angle = startAngle + (i * angleStep);
-                const x = centerX + Math.cos(angle) * r;
-                const y = centerY + Math.sin(angle) * r;
-
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
+            axes.forEach((axis, i) => {
+                const val = axis.val || 0;
+                const dist = (val / 100) * r;
+                const x = cx + Math.cos(axis.angle) * dist;
+                const y = cy + Math.sin(axis.angle) * dist;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+
+            // Draw Points & Labels
+            ctx.font = 'bold 12px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            axes.forEach(axis => {
+                const val = axis.val || 0;
+                const dist = (val / 100) * r;
+                const x = cx + Math.cos(axis.angle) * dist;
+                const y = cy + Math.sin(axis.angle) * dist;
+
+                // Point
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = axis.color;
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Label
+                const lx = cx + Math.cos(axis.angle) * (r + 20);
+                const ly = cy + Math.sin(axis.angle) * (r + 20);
+                ctx.fillStyle = axis.color;
+                ctx.fillText(axis.label, lx, ly);
+            });
         }
 
-        // Initialize empty chart on load
-        window.onload = function () {
-            // drawPentagon({Openness:50, Conscientiousness:50, Extraversion:50, Agreeableness:50, Neuroticism:50}); 
-        };
+        function toggleSloanInfo() {
+            const el = document.getElementById('sloan-info');
+            const btn = document.getElementById('archetype-detailed');
 
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.innerText = "[ EXPAND DESIGNATION ANALYSIS ]";
+            } else {
+                el.style.display = 'block';
+                btn.innerText = "[ COLLAPSE ANALYSIS ]";
+            }
+        }
+
+        // Init
+        renderQuestion();
+
+        // Handle Resize for Canvas
+        window.addEventListener('resize', () => {
+            if (document.getElementById('results-view').style.display === 'block') {
+                const scores = calculateScores();
+                drawPentagon(scores.normalized);
+            }
+        });
     </script>
 </body>
 
