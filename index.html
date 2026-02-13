@@ -560,47 +560,52 @@
                                     dominant spikes (Asymmetric).
                                 </div>
 
-                                <!-- Decile Table -->
+                                <!-- Intensity Table -->
                                 <table class="legend-table">
                                     <tr>
+                                        <th colspan="2"
+                                            style="border:none; padding-bottom:5px; color:#aaa; font-weight:normal;">
+                                            Intensity (|score − 50|)</th>
+                                    </tr>
+                                    <tr>
                                         <td class="sym">⁹</td>
-                                        <td>90% - 100%</td>
+                                        <td>45 - 50 (Extreme)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁸</td>
-                                        <td>80% - 89%</td>
+                                        <td>40 - 44 (Very High)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁷</td>
-                                        <td>70% - 79%</td>
+                                        <td>35 - 39 (High)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁶</td>
-                                        <td>60% - 69%</td>
+                                        <td>30 - 34 (Moderately High)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁵</td>
-                                        <td>50% - 59%</td>
+                                        <td>25 - 29 (Moderate)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁴</td>
-                                        <td>40% - 49%</td>
+                                        <td>20 - 24 (Mild)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">³</td>
-                                        <td>30% - 39%</td>
+                                        <td>15 - 19 (Slight)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">²</td>
-                                        <td>20% - 29%</td>
+                                        <td>10 - 14 (Very Slight)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">¹</td>
-                                        <td>10% - 19%</td>
+                                        <td>5 - 9 (Trace)</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁰</td>
-                                        <td>&lt; 10%</td>
+                                        <td>0 - 4 (Balanced)</td>
                                     </tr>
                                 </table>
 
@@ -846,16 +851,19 @@
 
         // ---------------- ADVANCED METRICS ----------------
         function getTraitSymbol(score) {
-            // Superscript Deciles: 0-9
+            // Superscript based on distance from 50 (Neutral)
             const superscripts = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
 
-            // Constrain 0-100 to index 0-9
-            // Math.floor(score / 10) gives 0-10.
-            // But 100 needs special handling if we want it to be 9, or maybe a 10th bin?
-            // "⁹ = 90 - 100". So let's clamp max index to 9.
-            let idx = Math.floor(score / 10);
+            const dist = Math.abs(score - 50);
+
+            // Map 0-50 distance to 0-9 index
+            // 0-4   -> 0 
+            // 5-9   -> 1
+            // ...
+            // 45-50 -> 9
+
+            let idx = Math.floor(dist / 5);
             if (idx > 9) idx = 9;
-            if (idx < 0) idx = 0;
 
             return superscripts[idx];
         }
