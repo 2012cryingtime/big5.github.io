@@ -939,7 +939,18 @@
 
             const mapTrait = (traitName, highChar, lowChar) => {
                 const val = normalized[traitName];
-                const sym = getTraitSymbol(val);
+
+                // --- MODIFICATION START ---
+                // We calculate "Intensity" for the symbol. 
+                // If the value is below 50, we invert it relative to 100 
+                // so that a 10 becomes a 90 (High Intensity of the Low Trait).
+                let intensityVal = val;
+                if (val < 50) {
+                    intensityVal = 100 - val;
+                }
+
+                const sym = getTraitSymbol(intensityVal);
+                // --- MODIFICATION END ---
 
                 let idx = Math.floor(val / 10);
                 if (idx > 9) idx = 9;
@@ -948,6 +959,7 @@
                 let char = "";
                 let isPerfectBalance = false;
 
+                // Rounding check for the "x" (Neutral)
                 if (Math.round(val) === 50) {
                     char = "x";
                     isPerfectBalance = true;
@@ -970,25 +982,23 @@
                     name = "Balanced";
                     description = `Perfectly Balanced ${traitName}`;
                 } else {
-                    // Fallback for non-perfect scores
                     const def = sloanDefs[char];
                     name = def.name;
 
-                    if (idx <= 3) {
+                    // We must also update the text logic to match the new intensity paradigm
+                    // or simply rely on the raw index (idx) which is still absolute (0-10).
+                    // The original logic for text description works fine with absolute index,
+                    // but let's ensure the adjectives match the new symbol logic.
+
+                    // If idx is 0, 1, 2 (Low score) -> Very [LowTrait]
+                    // If idx is 7, 8, 9 (High score) -> Very [HighTrait]
+
+                    if (idx <= 2 || idx >= 7) {
                         description = `Very ${def.name}`;
-                    } else if (idx === 4) {
-                        description = `Slightly ${def.name}`;
-                    } else if (idx === 5) {
-                        // 50-59 range but not exactly 50 (or rounded to 50 but logic captured it?)
-                        // Actually getTraitSymbol(50) -> ⁵. 
-                        // If it enters here, it means val != 50 (due to rounding check above).
-                        // Note: Math.round(50.1) is 50. So 50.1 triggers "x". 
-                        // But 52 triggers this block (idx 5).
-                        description = `Balanced ${traitName}`;
-                    } else if (idx === 6) {
-                        description = `Slightly ${def.name}`;
+                    } else if (idx === 3 || idx === 6) {
+                        description = `Moderately ${def.name}`;
                     } else {
-                        description = `Very ${def.name}`;
+                        description = `Slightly ${def.name}`;
                     }
                 }
 
