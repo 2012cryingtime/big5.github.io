@@ -564,39 +564,43 @@
                                 <table class="legend-table">
                                     <tr>
                                         <td class="sym">⁹</td>
-                                        <td>Extreme Intensity</td>
+                                        <td>90% - 100%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁸</td>
-                                        <td>Very High Intensity</td>
+                                        <td>80% - 89%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁷</td>
-                                        <td>High Intensity</td>
+                                        <td>70% - 79%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁶</td>
-                                        <td>Moderate Intensity</td>
+                                        <td>60% - 69%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁵</td>
-                                        <td>Low-Moderate Intensity</td>
+                                        <td>50% - 59%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">⁴</td>
-                                        <td>Low Intensity</td>
+                                        <td>40% - 49%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">³</td>
-                                        <td>Very Low Intensity</td>
+                                        <td>30% - 39%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">²</td>
-                                        <td>Minimal Intensity</td>
+                                        <td>20% - 29%</td>
                                     </tr>
                                     <tr>
                                         <td class="sym">¹</td>
-                                        <td>Balanced / Neutral</td>
+                                        <td>10% - 19%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="sym">⁰</td>
+                                        <td>&lt; 10%</td>
                                     </tr>
                                 </table>
 
@@ -935,26 +939,7 @@
 
             const mapTrait = (traitName, highChar, lowChar) => {
                 const val = normalized[traitName];
-
-                // --- MODIFICATION START ---
-                // We calculate "Intensity" 
-                // If the value is below 50, we invert it relative to 100 
-                // so that a 10 becomes a 90 (High Intensity of the Low Trait).
-                let intensityVal = val;
-                if (val < 50) {
-                    intensityVal = 100 - val;
-                }
-
-                // Map Intensity (50-100) to Scale (1-9)
-                // 50 -> 1 (Balanced)
-                // 100 -> 9 (Extreme)
-                // Formula: (intensityVal - 50) / 50 * 8 + 1
-                const scaleIdx = Math.floor(((intensityVal - 50) / 50) * 8) + 1;
-                const superscripts = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
-                // Clamp to be safe
-                const safeIdx = Math.max(1, Math.min(9, scaleIdx));
-                const sym = superscripts[safeIdx];
-                // --- MODIFICATION END ---
+                const sym = getTraitSymbol(val);
 
                 let idx = Math.floor(val / 10);
                 if (idx > 9) idx = 9;
@@ -963,7 +948,6 @@
                 let char = "";
                 let isPerfectBalance = false;
 
-                // Rounding check for the "x" (Neutral)
                 if (Math.round(val) === 50) {
                     char = "x";
                     isPerfectBalance = true;
@@ -986,18 +970,25 @@
                     name = "Balanced";
                     description = `Perfectly Balanced ${traitName}`;
                 } else {
+                    // Fallback for non-perfect scores
                     const def = sloanDefs[char];
                     name = def.name;
 
-                    // Text descriptions for 1-9 intensity scale
-                    if (safeIdx >= 8) { // 8, 9
-                        description = `Extreme ${def.name}`;
-                    } else if (safeIdx >= 6) { // 6, 7
+                    if (idx <= 3) {
                         description = `Very ${def.name}`;
-                    } else if (safeIdx >= 4) { // 4, 5
-                        description = `Moderately ${def.name}`;
-                    } else { // 1, 2, 3
+                    } else if (idx === 4) {
                         description = `Slightly ${def.name}`;
+                    } else if (idx === 5) {
+                        // 50-59 range but not exactly 50 (or rounded to 50 but logic captured it?)
+                        // Actually getTraitSymbol(50) -> ⁵. 
+                        // If it enters here, it means val != 50 (due to rounding check above).
+                        // Note: Math.round(50.1) is 50. So 50.1 triggers "x". 
+                        // But 52 triggers this block (idx 5).
+                        description = `Balanced ${traitName}`;
+                    } else if (idx === 6) {
+                        description = `Slightly ${def.name}`;
+                    } else {
+                        description = `Very ${def.name}`;
                     }
                 }
 
