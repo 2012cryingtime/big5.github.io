@@ -956,7 +956,7 @@
                 // Build Breakdown HTML
                 // Bracket labels based on intensity pairs:
                 //   0-1 = Neutral / Balanced
-                //   2-3 = Vaguely
+                //   2-3 = Slightly
                 //   4-5 = Moderately
                 //   6-7 = Very
                 //   8-9 = Extremely
@@ -973,7 +973,7 @@
                     if (idx <= 1) {
                         description = `Balanced ${traitName}`;
                     } else if (idx <= 3) {
-                        description = `Vaguely ${def.name}`;
+                        description = `Slightly ${def.name}`;
                     } else if (idx <= 5) {
                         description = `Moderately ${def.name}`;
                     } else if (idx <= 7) {
